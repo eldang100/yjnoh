@@ -85,7 +85,7 @@
   }
   .day{
     background:var(--bg);
-    padding:3px 3px 2px;
+    padding:4px 4px 3px;
     position:relative;
     display:flex;
     flex-direction:column;
@@ -96,18 +96,18 @@
   .day.other{opacity:.35;}
   .day.holiday{background:rgba(255,107,122,.12);}
   .day.selected{box-shadow:inset 0 0 0 2px var(--accent);}
-  .daynum-row{display:flex;align-items:center;gap:4px;flex-shrink:0;height:16px;}
-  .daynum{font-size:12px;font-weight:600;color:var(--text-dim);flex-shrink:0;}
-  .day.today .daynum{background:var(--accent);color:#0c1210;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;}
+  .daynum-row{display:flex;align-items:center;gap:4px;flex-shrink:0;height:18px;}
+  .daynum{font-size:13px;font-weight:600;color:var(--text-dim);flex-shrink:0;}
+  .day.today .daynum{background:var(--accent);color:#0c1210;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;}
   .day.sun .daynum{color:var(--sun);}
   .day.sat .daynum{color:var(--sat);}
-  .holiday-badge{font-size:8.5px;line-height:1;color:var(--holiday);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
-  .entry{font-size:10px;line-height:1.3;padding:1px 4px;border-radius:3px;color:#0c0e12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;display:flex;align-items:center;gap:3px;flex-shrink:0;}
+  .holiday-badge{font-size:9px;line-height:1;color:var(--holiday);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+  .entry{font-size:10.5px;line-height:1.3;padding:1px 4px;border-radius:3px;color:#0c0e12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;display:flex;align-items:center;gap:3px;flex-shrink:0;}
   .entry .rep-mark{font-size:8px;opacity:.75;}
   .more{font-size:9px;color:var(--text-dim);padding:0 4px;flex-shrink:0;}
   /* ---- bottom panel (docked, always visible) ---- */
   #bottomPanel{
-    flex:0 0 34%;
+    flex:0 0 30%;
     display:flex;
     flex-direction:column;
     background:var(--surface);
@@ -116,18 +116,19 @@
     min-height:0;
   }
   .panel-header{display:flex;align-items:baseline;justify-content:space-between;flex-shrink:0;margin-bottom:4px;}
-  .panel-date{font-size:15px;font-weight:700;}
+  .panel-date{font-size:16px;font-weight:800;}
+  .panel-meta{font-size:11px;color:var(--text-dim);margin-top:2px;}
   .panel-holiday{font-size:12px;color:var(--holiday);font-weight:700;}
   #panelList{flex:1 1 auto;overflow-y:auto;min-height:0;}
-  .entry-row{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line);}
-  .entry-row .swatch{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-  .entry-row .info{flex:1;font-size:14px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .entry-row{display:flex;align-items:center;gap:10px;padding:9px 10px;margin:6px 0;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;background:var(--surface2);box-shadow:0 2px 7px rgba(0,0,0,.08);}
+  .entry-row .swatch{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .entry-row .info{flex:1;font-size:14px;line-height:1.35;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .entry-row .info .label{font-weight:700;}
   .entry-row .info .sub{color:var(--text-dim);font-size:12px;margin-left:6px;}
-  .entry-row .info .time{color:var(--accent);font-weight:700;margin-right:6px;}
-  .entry-row .info .memo{color:var(--text-dim);font-size:13px;margin-left:8px;}
-  .entry-row button{background:none;border:none;color:var(--text-dim);font-size:13px;padding:4px 6px;flex-shrink:0;}
-  .empty-hint{color:var(--text-dim);font-size:13px;padding:10px 2px;}
+  .entry-row .info .time{display:inline-block;color:var(--accent);font-weight:800;margin-right:7px;}
+  .entry-row .info .memo{display:block;color:var(--text-dim);font-size:12px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .entry-row button{background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--text-dim);font-size:12px;padding:6px 8px;flex-shrink:0;}
+  .empty-hint{color:var(--text-dim);font-size:13px;padding:18px 10px;text-align:center;border:1px dashed var(--line);border-radius:12px;margin-top:8px;}
   .panel-add{flex-shrink:0;margin-top:8px;padding:11px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;background:var(--accent);color:#0c1210;}
 
   /* ---- sheets (modal forms) ---- */
@@ -137,9 +138,18 @@
   .sheet h2{font-size:16px;margin:0 0 14px;}
   .field{margin-bottom:14px;}
   .field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;}
-  .time-range-row{display:flex;align-items:center;gap:8px;}
-  .time-range-row select{flex:1;min-width:0;}
-  .time-range-sep{font-weight:700;color:var(--text-dim);font-size:16px;}
+  .time-range-row{display:flex;align-items:flex-start;gap:7px;}
+  .time-wheel-control{flex:1;min-width:0;}
+  .time-wheel-title{font-size:11px;color:var(--text-dim);font-weight:700;margin:0 0 5px 2px;}
+  .time-wheel-line{display:flex;align-items:center;justify-content:center;gap:3px;background:var(--surface2);border:1px solid var(--line);border-radius:11px;padding:5px 6px;}
+  .hour-select{width:58px!important;flex:0 0 58px!important;padding:8px 4px!important;text-align:center;border:none!important;background:transparent!important;}
+  .time-unit{font-size:13px;color:var(--text-dim);font-weight:700;flex-shrink:0;}
+  .minute-wheel-wrap{height:126px;width:48px;overflow:hidden;border-radius:8px;background:var(--surface);border:1px solid var(--line);}
+  .minute-wheel{height:126px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+  .minute-wheel::-webkit-scrollbar{display:none;}
+  .minute-option{height:42px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:15px;font-weight:700;color:var(--text-dim);cursor:pointer;}
+  .minute-option.selected{color:var(--text);font-weight:900;background:var(--surface2);}
+  .time-range-sep{font-weight:800;color:var(--text-dim);font-size:16px;padding-top:31px;}
   .field input[type=text], .field input[type=date], .field select, .field textarea{
     width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px 12px;font-size:15px;font-family:inherit;
   }
@@ -180,50 +190,34 @@
   .color-btn{height:34px;border-radius:9px;border:2px solid transparent;cursor:pointer;position:relative;}
   .color-btn.selected{border-color:var(--text);}
   .color-btn.selected::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.65);}
+
+  /* compact entry sheet */
+  .sheet{padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));max-height:82vh;}
+  .sheet h2{font-size:15px;margin:0 0 10px;}
+  .field{margin-bottom:9px;}
+  .field label{font-size:11px;margin-bottom:4px;}
+  .type-toggle{gap:6px;}
+  .type-pill{padding:9px 7px;font-size:13px;border-radius:9px;}
+  .seg-toggle button{padding:7px;font-size:12px;}
+  .time-range-row{gap:5px;}
+  .time-wheel-title{font-size:10px;margin:0 0 3px 2px;}
+  .time-wheel-line{gap:2px;border-radius:9px;padding:3px 4px;}
+  .hour-select{width:50px!important;flex-basis:50px!important;padding:6px 2px!important;font-size:13px!important;}
+  .time-unit{font-size:11px;}
+  .minute-wheel-wrap{height:84px;width:42px;border-radius:7px;}
+  .minute-wheel{height:84px;}
+  .minute-option{height:28px;font-size:13px;}
+  .time-range-sep{font-size:14px;padding-top:23px;}
+  .field input[type=text],.field input[type=date],.field select,.field textarea{padding:8px 10px;font-size:14px;border-radius:8px;}
+  .field textarea{min-height:46px;}
+  .color-picker{gap:6px;}
+  .color-btn{height:29px;border-radius:7px;}
+  .weekday-picker{gap:4px;}
+  .btn-row{gap:7px;margin-top:4px;}
+  .btn{padding:10px;font-size:14px;border-radius:9px;}
+  .hint{font-size:10px;margin-top:4px;}
+
 </style>
-
-  <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#10a88f">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="방문간호">
-  <link rel="apple-touch-icon" href="icons/icon-180.png">
-
-
-<style id="pwa-install-style">
-  #pwaInstallBtn{
-    position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));
-    z-index:1000;border:0;border-radius:999px;padding:11px 15px;
-    background:#10a88f;color:#fff;font-size:13px;font-weight:800;
-    box-shadow:0 5px 18px rgba(0,0,0,.22);display:none;
-  }
-  #pwaInstallHelp{
-    position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.48);
-    display:none;align-items:flex-end;justify-content:center;
-  }
-  #pwaInstallHelp .pwa-box{
-    width:min(92vw,420px);background:#fff;color:#18221f;border-radius:18px 18px 0 0;
-    padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));
-    box-shadow:0 -8px 30px rgba(0,0,0,.22);
-  }
-  #pwaInstallHelp h3{margin:0 0 10px;font-size:18px}
-  #pwaInstallHelp p{margin:8px 0;line-height:1.5;font-size:14px}
-  #pwaInstallHelp .pwa-close{
-    margin-top:12px;width:100%;padding:12px;border:0;border-radius:10px;
-    background:#eef4f2;font-weight:800;color:#18221f;
-  }
-  #pwaInstallHelp strong{color:#087e6b}
-</style>
-<button id="pwaInstallBtn" type="button">📱 홈 화면에 추가</button>
-<div id="pwaInstallHelp" role="dialog" aria-modal="true" aria-label="홈 화면에 추가">
-  <div class="pwa-box">
-    <h3>방문간호 앱으로 추가</h3>
-    <p id="pwaInstallText"></p>
-    <button class="pwa-close" type="button">닫기</button>
-  </div>
-</div>
-
 </head>
 <body>
 
@@ -248,7 +242,10 @@
 
 <div id="bottomPanel">
   <div class="panel-header">
-    <div class="panel-date" id="panelDate"></div>
+    <div>
+      <div class="panel-date" id="panelDate"></div>
+      <div class="panel-meta"><span id="panelCount">일정 0개</span></div>
+    </div>
     <div class="panel-holiday" id="panelHoliday"></div>
   </div>
   <div id="panelList"></div>
@@ -314,15 +311,32 @@
     <div class="field">
       <label>시간</label>
       <div class="time-range-row">
-        <select id="entryHour" aria-label="시작시간">
-          <option value="">시작시간</option>
-        </select>
+        <div class="time-wheel-control">
+          <div class="time-wheel-title">시작</div>
+          <div class="time-wheel-line">
+            <select id="entryHourHour" class="hour-select" aria-label="시작시간 시"></select>
+            <span class="time-unit">시</span>
+            <div class="minute-wheel-wrap">
+              <div class="minute-wheel" id="entryHourMinute" tabindex="0" aria-label="시작시간 분"></div>
+            </div>
+            <span class="time-unit">분</span>
+          </div>
+          <input id="entryHour" type="hidden" value="">
+        </div>
         <span class="time-range-sep">~</span>
-        <select id="entryEndHour" aria-label="종료시간">
-          <option value="">종료시간</option>
-        </select>
+        <div class="time-wheel-control">
+          <div class="time-wheel-title">종료</div>
+          <div class="time-wheel-line">
+            <select id="entryEndHourHour" class="hour-select" aria-label="종료시간 시"></select>
+            <span class="time-unit">시</span>
+            <div class="minute-wheel-wrap">
+              <div class="minute-wheel" id="entryEndHourMinute" tabindex="0" aria-label="종료시간 분"></div>
+            </div>
+            <span class="time-unit">분</span>
+          </div>
+          <input id="entryEndHour" type="hidden" value="">
+        </div>
       </div>
-      
     </div>
 
     <div class="field">
@@ -670,6 +684,7 @@
   const panelDate = document.getElementById('panelDate');
   const panelHoliday = document.getElementById('panelHoliday');
   const panelList = document.getElementById('panelList');
+  const panelCount = document.getElementById('panelCount');
 
   function renderPanel(){
     const [y,m,d] = selectedKey.split('-').map(Number);
@@ -681,6 +696,7 @@
 
     panelList.innerHTML = '';
     const list = occurrencesForDate(y, m-1, d);
+    panelCount.textContent = '일정 ' + list.length + '개';
     if(list.length===0){
       const p=document.createElement('div');
       p.className='empty-hint'; p.textContent='등록된 일정이 없습니다.';
@@ -694,10 +710,11 @@
       const endText = getEndMinutes(ent)!==null ? formatHour(ent.endHour) : '';
       const timeText = startText ? (endText ? startText+' ~ '+endText : startText) : '';
       const timeHtml = timeText ? `<span class="time">${timeText}</span>` : '';
+      row.style.borderLeftColor = ent.color || TYPE_COLOR[ent.type];
       row.innerHTML = `<div class="swatch" style="background:${ent.color || TYPE_COLOR[ent.type]}"></div>
         <div class="info">${timeHtml}<span class="label">${escapeHtml(entryTitle(ent))}</span>${ent.memo?`<span class="memo">${escapeHtml(ent.memo)}</span>`:''}</div>
-        <button class="edit-btn">수정</button>
-        <button class="del-btn">삭제</button>`;
+        <button class="edit-btn" aria-label="일정 수정">수정</button>
+        <button class="del-btn" aria-label="일정 삭제">삭제</button>`;
       row.querySelector('.edit-btn').addEventListener('click', ()=> openEntrySheet(ent.key, ent));
       row.querySelector('.del-btn').addEventListener('click', ()=>{
         showConfirm('이 일정을 삭제할까요?', ()=>{
@@ -733,24 +750,109 @@
   const entryMemo = document.getElementById('entryMemo');
   const entryHour = document.getElementById('entryHour');
   const entryEndHour = document.getElementById('entryEndHour');
+  const entryHourHour = document.getElementById('entryHourHour');
+  const entryEndHourHour = document.getElementById('entryEndHourHour');
+  const entryHourMinute = document.getElementById('entryHourMinute');
+  const entryEndHourMinute = document.getElementById('entryEndHourMinute');
+
+  function buildHourSelect(select){
+    select.innerHTML = '<option value="">--</option>';
+    for(let h=8; h<=21; h++) select.insertAdjacentHTML('beforeend', `<option value="${pad(h)}">${h}</option>`);
+  }
+  function buildMinuteWheel(wheel){
+    wheel.innerHTML = '';
+    const top=document.createElement('div');
+    top.className='minute-spacer';
+    top.style.height='28px';
+    wheel.appendChild(top);
+    for(let m=0; m<60; m+=10){
+      const d=document.createElement('div');
+      d.className='minute-option';
+      d.dataset.minute=pad(m);
+      d.textContent=pad(m);
+      wheel.appendChild(d);
+    }
+    const bottom=document.createElement('div');
+    bottom.className='minute-spacer';
+    bottom.style.height='28px';
+    wheel.appendChild(bottom);
+  }
+  buildHourSelect(entryHourHour);
+  buildHourSelect(entryEndHourHour);
+  buildMinuteWheel(entryHourMinute);
+  buildMinuteWheel(entryEndHourMinute);
+
+  function setTimeUI(hidden, hourSelect, wheel, value){
+    hidden.value = value || '';
+    if(!value){
+      hourSelect.value='';
+      wheel.querySelectorAll('.minute-option').forEach(x=>x.classList.remove('selected'));
+      wheel.scrollTop=0;
+      return;
+    }
+    const mins=timeValueToMinutes(value);
+    if(mins===null){ hourSelect.value=''; return; }
+    const h=Math.floor(mins/60), m=mins%60;
+    hourSelect.value=pad(h);
+    const opt=[...wheel.children].find(x=>Number(x.dataset.minute)===m);
+    wheel.querySelectorAll('.minute-option').forEach(x=>x.classList.toggle('selected',x===opt));
+    if(opt) wheel.scrollTop=Math.max(0,opt.offsetTop - (wheel.clientHeight-opt.offsetHeight)/2);
+  }
+  function syncTimeUI(hidden, hourSelect, wheel){
+    const h=hourSelect.value;
+    const selected=wheel.querySelector('.minute-option.selected');
+    hidden.value=(h && selected) ? h+':'+selected.dataset.minute : '';
+  }
+  function attachTimeUI(hidden, hourSelect, wheel){
+    hourSelect.addEventListener('change',()=>syncTimeUI(hidden,hourSelect,wheel));
+    wheel.addEventListener('click',e=>{
+      const opt=e.target.closest('.minute-option');
+      if(!opt) return;
+      wheel.querySelectorAll('.minute-option').forEach(x=>x.classList.remove('selected'));
+      opt.classList.add('selected');
+      opt.scrollIntoView({block:'center',behavior:'smooth'});
+      syncTimeUI(hidden,hourSelect,wheel);
+    });
+    let timer;
+    wheel.addEventListener('scroll',()=>{
+      clearTimeout(timer);
+      timer=setTimeout(()=>{
+        const center=wheel.scrollTop + wheel.clientHeight/2;
+        let best=null,dist=Infinity;
+        wheel.querySelectorAll('.minute-option').forEach(opt=>{
+          const c=opt.offsetTop+opt.offsetHeight/2, d=Math.abs(c-center);
+          if(d<dist){dist=d;best=opt;}
+        });
+        if(best){
+          wheel.querySelectorAll('.minute-option').forEach(x=>x.classList.toggle('selected',x===best));
+          syncTimeUI(hidden,hourSelect,wheel);
+        }
+      },80);
+    },{passive:true});
+  }
+  attachTimeUI(entryHour,entryHourHour,entryHourMinute);
+  attachTimeUI(entryEndHour,entryEndHourHour,entryEndHourMinute);
   const entryDeleteRow = document.getElementById('entryDeleteRow');
   const colorPicker = document.getElementById('colorPicker');
 
-  function fillTimeSelect(select, emptyLabel){
-    select.innerHTML = '';
-    const empty = document.createElement('option');
-    empty.value = '';
-    empty.textContent = emptyLabel;
-    select.appendChild(empty);
-    for(let minutes=8*60; minutes<=21*60; minutes+=30){
-      const opt = document.createElement('option');
-      opt.value = minutes;
-      opt.textContent = formatHour(minutes);
-      select.appendChild(opt);
-    }
+  function minutesToTimeValue(h){
+    const mins = normalizeMinutes(h);
+    if(mins===null) return '';
+    const hh = Math.floor(mins/60);
+    const mm = mins % 60;
+    return pad(hh)+':'+pad(mm);
   }
-  fillTimeSelect(entryHour, '시작시간');
-  fillTimeSelect(entryEndHour, '종료시간');
+  function timeValueToMinutes(v){
+    if(!v) return null;
+    const parts = v.split(':').map(Number);
+    if(parts.length!==2 || !Number.isFinite(parts[0]) || !Number.isFinite(parts[1])) return null;
+    return parts[0]*60 + parts[1];
+  }
+  function validTenMinuteTime(v){
+    if(!v) return true;
+    const mins = timeValueToMinutes(v);
+    return mins!==null && mins>=8*60 && mins<=21*60 && mins%10===0;
+  }
 
   let selectedType = 'facility';
   let selectedColor = TYPE_COLOR.facility;
@@ -821,8 +923,8 @@
       selectedType = rule.type;
       selectedColor = rule.color || TYPE_COLOR[rule.type];
       entryMemo.value = rule.memo || '';
-      entryHour.value = (rule.hour===null || rule.hour===undefined) ? '' : normalizeMinutes(rule.hour);
-      entryEndHour.value = (rule.endHour===null || rule.endHour===undefined) ? '' : normalizeMinutes(rule.endHour);
+      entryHour.value = minutesToTimeValue(rule.hour);
+      entryEndHour.value = minutesToTimeValue(rule.endHour);
       repeatMode = 'weekly';
       selectedDays = new Set(rule.days);
       repeatStart.value = rule.start || dayKey;
@@ -834,8 +936,8 @@
       selectedType = ent.type;
       selectedColor = ent.color || TYPE_COLOR[ent.type];
       entryMemo.value = ent.memo || '';
-      entryHour.value = (ent.hour===null || ent.hour===undefined) ? '' : normalizeMinutes(ent.hour);
-      entryEndHour.value = (ent.endHour===null || ent.endHour===undefined) ? '' : normalizeMinutes(ent.endHour);
+      entryHour.value = minutesToTimeValue(ent.hour);
+      entryEndHour.value = minutesToTimeValue(ent.endHour);
       repeatMode = 'once';
       selectedDays = new Set([toDate(dayKey).getDay()]);
       editingSingleId = ent.id;
@@ -848,6 +950,8 @@
       selectedDays = new Set([toDate(dayKey).getDay()]);
       entryDeleteRow.style.display = 'none';
     }
+    setTimeUI(entryHour, entryHourHour, entryHourMinute, entryHour.value);
+    setTimeUI(entryEndHour, entryEndHourHour, entryEndHourMinute, entryEndHour.value);
     updateTypeUI();
     renderColorPicker();
     updateRepeatUI();
@@ -860,8 +964,12 @@
   entryBackdrop.addEventListener('click', e=>{ if(e.target.id==='entryBackdrop') closeLayerWithHistory(entryBackdrop); });
 
   document.getElementById('entrySave').addEventListener('click', ()=>{
-    const hourVal = entryHour.value === '' ? null : parseInt(entryHour.value, 10);
-    const endHourVal = entryEndHour.value === '' ? null : parseInt(entryEndHour.value, 10);
+    if(!validTenMinuteTime(entryHour.value) || !validTenMinuteTime(entryEndHour.value)){
+      showAlert('시간은 10분 단위로 선택해 주세요.');
+      return;
+    }
+    const hourVal = timeValueToMinutes(entryHour.value);
+    const endHourVal = timeValueToMinutes(entryEndHour.value);
     if(hourVal !== null && endHourVal !== null && endHourVal < hourVal){ showAlert('종료시간은 시작시간보다 같거나 늦게 선택해 주세요.'); return; }
     if(repeatMode==='weekly'){
       if(selectedDays.size===0){ showAlert('반복할 요일을 하나 이상 선택해 주세요.'); return; }
@@ -1054,68 +1162,5 @@
   render();
 })();
 </script>
-
-<script>
-(function(){
-  let deferredPrompt = null;
-  const btn = document.getElementById('pwaInstallBtn');
-  const help = document.getElementById('pwaInstallHelp');
-  const text = document.getElementById('pwaInstallText');
-  const close = help.querySelector('.pwa-close');
-
-  function isIOS(){
-    return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  }
-
-  function isStandalone(){
-    return window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true;
-  }
-
-  function showHelp(){
-    if(isStandalone()) return;
-    if(isIOS()){
-      text.innerHTML = 'Safari에서 <strong>공유 버튼(□↑)</strong>을 누른 뒤<br><strong>“홈 화면에 추가”</strong>를 선택하면 됩니다.';
-    }else{
-      text.innerHTML = '브라우저 메뉴에서 <strong>“홈 화면에 추가”</strong> 또는 <strong>“앱 설치”</strong>를 선택하세요.';
-    }
-    help.style.display='flex';
-  }
-
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    deferredPrompt = e;
-    if(!isStandalone()) btn.style.display='block';
-  });
-
-  btn.addEventListener('click', async function(){
-    if(deferredPrompt){
-      deferredPrompt.prompt();
-      try { await deferredPrompt.userChoice; } catch(e) {}
-      deferredPrompt = null;
-      btn.style.display='none';
-    }else{
-      showHelp();
-    }
-  });
-
-  close.addEventListener('click', ()=> help.style.display='none');
-  help.addEventListener('click', e=>{ if(e.target===help) help.style.display='none'; });
-
-  if(!isStandalone() && isIOS()){
-    setTimeout(()=>{ btn.style.display='block'; }, 700);
-  }
-
-  window.addEventListener('appinstalled', ()=>{ btn.style.display='none'; });
-
-  if('serviceWorker' in navigator){
-    window.addEventListener('load', ()=>{
-      navigator.serviceWorker.register('./sw.js').catch(()=>{});
-    });
-  }
-})();
-</script>
-
 </body>
 </html>
