@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>방문간호 일정관리</title>
+<style>
+  :root{
+    --bg: #101319;
+    --surface: #181c24;
+    --surface2: #1f2430;
+    --line: #2a2f3a;
+    --text: #eceef2;
+    --text-dim: #8b91a0;
+    --accent: #4fb3a9;
+    --danger: #e0575a;
+    --sun: #ff6b7a;
+    --sat: #5b8cff;
+    --facility: #e0a83d;
+    --visit: #3d8ee0;
+    --holiday: #ff6b7a;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root[data-theme="light"]{
+    --bg: #f5f6f9;
+    --surface: #ffffff;
+    --surface2: #eef0f4;
+    --line: #dde1e8;
+    --text: #1b1e24;
+    --text-dim: #6b7280;
+    --accent: #1f8f7e;
+    --danger: #d1373a;
+    --sun: #e11d48;
+    --sat: #2563eb;
+    --facility: #c98a1f;
+    --visit: #2f6fb0;
+    --holiday: #e11d48;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  /* ---- compact header ---- */
+  header{
+    flex:0 0 auto;
+    background:var(--bg);
+    padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 6px;
+    border-bottom:1px solid var(--line);
+  }
+  .title-row{display:flex;align-items:center;gap:5px;}
+  .title-row button{background:none;border:none;color:var(--text-dim);font-size:18px;padding:4px 6px;cursor:pointer;line-height:1;}
+  .title-row h1{font-size:14.5px;font-weight:700;margin:0;text-align:center;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+  .icon-btn{background:var(--surface2);border:1px solid var(--line);border-radius:14px;font-size:12px;padding:5px 7px;cursor:pointer;color:var(--text);flex-shrink:0;}
+  .legend{display:flex;gap:7px;flex:1;justify-content:center;font-size:10.5px;color:var(--text-dim);overflow:hidden;}
+  .legend span{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
+  .legend i{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+  .weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:6px 4px 2px;font-size:11px;color:var(--text-dim);}
+  .weekdays div{text-align:center;padding:1px 0;}
+  .weekdays div:first-child{color:var(--sun);}
+  .weekdays div:last-child{color:var(--sat);}
+
+  /* ---- calendar grid ---- */
+  #grid{
+    flex:1 1 auto;
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:1px;
+    background:var(--line);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+    min-height:0;
+  }
+  .day{
+    background:var(--bg);
+    padding:4px 4px 3px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+    overflow:hidden;
+    min-height:0;
+  }
+  .day.other{opacity:.35;}
+  .day.holiday{background:rgba(255,107,122,.12);}
+  .day.selected{box-shadow:inset 0 0 0 2px var(--accent);}
+  .daynum-row{display:flex;align-items:center;gap:4px;flex-shrink:0;height:18px;}
+  .daynum{font-size:13px;font-weight:600;color:var(--text-dim);flex-shrink:0;}
+  .day.today .daynum{background:var(--accent);color:#0c1210;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;}
+  .day.sun .daynum{color:var(--sun);}
+  .day.sat .daynum{color:var(--sat);}
+  .holiday-badge{font-size:9px;line-height:1;color:var(--holiday);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+  .entry{font-size:10.5px;line-height:1.3;padding:1px 4px;border-radius:3px;color:#0c0e12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;display:flex;align-items:center;gap:3px;flex-shrink:0;}
+  .entry .rep-mark{font-size:8px;opacity:.75;}
+  .more{font-size:9px;color:var(--text-dim);padding:0 4px;flex-shrink:0;}
+  /* ---- bottom panel (docked, always visible) ---- */
+  #bottomPanel{
+    flex:0 0 30%;
+    display:flex;
+    flex-direction:column;
+    background:var(--surface);
+    border-top:1px solid var(--line);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
+    min-height:0;
+  }
+  .panel-header{display:flex;align-items:baseline;justify-content:space-between;flex-shrink:0;margin-bottom:4px;}
+  .panel-date{font-size:16px;font-weight:800;}
+  .panel-meta{font-size:11px;color:var(--text-dim);margin-top:2px;}
+  .panel-holiday{font-size:12px;color:var(--holiday);font-weight:700;}
+  #panelList{flex:1 1 auto;overflow-y:auto;min-height:0;}
+  .entry-row{display:flex;align-items:center;gap:10px;padding:9px 10px;margin:6px 0;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;background:var(--surface2);box-shadow:0 2px 7px rgba(0,0,0,.08);}
+  .entry-row .swatch{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .entry-row .info{flex:1;font-size:14px;line-height:1.35;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .entry-row .info .label{font-weight:700;}
+  .entry-row .info .sub{color:var(--text-dim);font-size:12px;margin-left:6px;}
+  .entry-row .info .time{display:inline-block;color:var(--accent);font-weight:800;margin-right:7px;}
+  .entry-row .info .memo{display:block;color:var(--text-dim);font-size:12px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .entry-row button{background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--text-dim);font-size:12px;padding:6px 8px;flex-shrink:0;}
+  .empty-hint{color:var(--text-dim);font-size:13px;padding:18px 10px;text-align:center;border:1px dashed var(--line);border-radius:12px;margin-top:8px;}
+  .panel-add{flex-shrink:0;margin-top:8px;padding:11px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;background:var(--accent);color:#0c1210;}
+
+  /* ---- sheets (modal forms) ---- */
+  .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:30;}
+  .sheet-backdrop.open{display:flex;}
+  .sheet{background:var(--surface);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:16px 18px calc(20px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow-y:auto;}
+  .sheet h2{font-size:16px;margin:0 0 14px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;}
+  .time-range-row{display:flex;align-items:center;gap:8px;}
+  .time-range-row input[type=time]{flex:1;min-width:0;}
+  .time-range-sep{font-weight:700;color:var(--text-dim);font-size:16px;}
+  .field input[type=text], .field input[type=date], .field select, .field textarea{
+    width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px 12px;font-size:15px;font-family:inherit;
+  }
+  .field textarea{resize:vertical;min-height:56px;}
+
+  .type-toggle{display:flex;gap:8px;}
+  .type-pill{flex:1;text-align:center;padding:12px 8px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;border:2px solid transparent;color:#0c0e12;}
+  .type-pill.selected{border-color:var(--text);}
+  .type-pill.facility{background:var(--facility);}
+  .type-pill.visit{background:var(--visit);}
+
+  .seg-toggle{display:flex;background:var(--surface2);border-radius:10px;padding:3px;}
+  .seg-toggle button{flex:1;padding:9px;border:none;background:none;color:var(--text-dim);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
+  .seg-toggle button.active{background:var(--accent);color:#0c1210;}
+
+  .weekday-picker{display:flex;gap:6px;justify-content:space-between;}
+  .wd-btn{flex:1;aspect-ratio:1;border-radius:50%;border:1px solid var(--line);background:var(--surface2);color:var(--text-dim);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .wd-btn.active{background:var(--accent);color:#0c1210;border-color:var(--accent);}
+
+  .btn-row{display:flex;gap:10px;margin-top:6px;}
+  .btn{flex:1;padding:12px;border-radius:10px;border:none;font-size:15px;font-weight:700;cursor:pointer;}
+  .btn.save{background:var(--accent);color:#0c1210;}
+  .btn.cancel{background:var(--surface2);color:var(--text);}
+  .btn.delete{background:transparent;color:var(--danger);}
+  .hint{font-size:11.5px;color:var(--text-dim);margin-top:6px;}
+
+  .jump-row{display:flex;gap:10px;}
+  .jump-row .field{flex:1;margin-bottom:0;}
+
+  .confirm-box{background:var(--surface);width:100%;max-width:360px;border-radius:16px;padding:20px;text-align:center;}
+  .confirm-box p{font-size:15px;margin:0 0 16px;color:var(--text);}
+
+  /* iPhone/Safari long-press friendly calendar cells */
+  .day{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  .day.long-pressing{box-shadow:inset 0 0 0 2px var(--accent);}
+
+  .color-picker{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+  .color-btn{height:34px;border-radius:9px;border:2px solid transparent;cursor:pointer;position:relative;}
+  .color-btn.selected{border-color:var(--text);}
+  .color-btn.selected::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.65);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-row">
+    <button id="prevBtn" aria-label="이전 달">‹</button>
+    <h1 id="monthLabel"></h1>
+    <button id="nextBtn" aria-label="다음 달">›</button>
+    <div class="legend">
+      <span><i style="background:var(--visit)"></i>방문</span>
+      <span><i style="background:var(--facility)"></i>요양</span>
+    </div>
+    <button class="icon-btn" id="todayBtn">오늘</button>
+    <button class="icon-btn" id="themeBtn">🌙</button>
+  </div>
+  <div class="weekdays">
+    <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+  </div>
+</header>
+
+<div id="grid"></div>
+
+<div id="bottomPanel">
+  <div class="panel-header">
+    <div>
+      <div class="panel-date" id="panelDate"></div>
+      <div class="panel-meta"><span id="panelCount">일정 0개</span></div>
+    </div>
+    <div class="panel-holiday" id="panelHoliday"></div>
+  </div>
+  <div id="panelList"></div>
+</div>
+
+<!-- Add/Edit entry sheet -->
+<div class="sheet-backdrop" id="entryBackdrop">
+  <div class="sheet">
+    <h2 id="entrySheetTitle">일정 추가</h2>
+
+    <div class="field">
+      <label>구분</label>
+      <div class="type-toggle" id="typeToggle">
+        <div class="type-pill facility" data-type="facility">요양간호</div>
+        <div class="type-pill visit" data-type="visit">방문간호</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>버튼 색상</label>
+      <div class="color-picker" id="colorPicker">
+        <button type="button" class="color-btn" data-color="#e0a83d" style="background:#e0a83d" aria-label="노랑"></button>
+        <button type="button" class="color-btn" data-color="#3d8ee0" style="background:#3d8ee0" aria-label="파랑"></button>
+        <button type="button" class="color-btn" data-color="#4fb3a9" style="background:#4fb3a9" aria-label="청록"></button>
+        <button type="button" class="color-btn" data-color="#e0575a" style="background:#e0575a" aria-label="빨강"></button>
+        <button type="button" class="color-btn" data-color="#8b5cf6" style="background:#8b5cf6" aria-label="보라"></button>
+        <button type="button" class="color-btn" data-color="#ec4899" style="background:#ec4899" aria-label="분홍"></button>
+        <button type="button" class="color-btn" data-color="#22c55e" style="background:#22c55e" aria-label="초록"></button>
+        <button type="button" class="color-btn" data-color="#64748b" style="background:#64748b" aria-label="회색"></button>
+        <button type="button" class="color-btn" data-color="#f97316" style="background:#f97316" aria-label="주황"></button>
+        <button type="button" class="color-btn" data-color="#06b6d4" style="background:#06b6d4" aria-label="하늘"></button>
+        <button type="button" class="color-btn" data-color="#f59e0b" style="background:#f59e0b" aria-label="금색"></button>
+        <button type="button" class="color-btn" data-color="#94a3b8" style="background:#94a3b8" aria-label="연회색"></button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>반복</label>
+      <div class="seg-toggle" id="repeatToggle">
+        <button type="button" data-mode="once" class="active">이 날짜만</button>
+        <button type="button" data-mode="weekly">매주 반복</button>
+      </div>
+    </div>
+
+    <div class="field" id="weeklyField" style="display:none;">
+      <label>반복 요일 (여러 개 선택 가능)</label>
+      <div class="weekday-picker" id="weekdayPicker">
+        <div class="wd-btn" data-d="0">일</div>
+        <div class="wd-btn" data-d="1">월</div>
+        <div class="wd-btn" data-d="2">화</div>
+        <div class="wd-btn" data-d="3">수</div>
+        <div class="wd-btn" data-d="4">목</div>
+        <div class="wd-btn" data-d="5">금</div>
+        <div class="wd-btn" data-d="6">토</div>
+      </div>
+      <div class="hint">시작일 이후, 선택한 요일마다 자동으로 반복됩니다.</div>
+      <label style="margin-top:10px;">시작일</label>
+      <input type="date" id="repeatStart">
+      <label style="margin-top:10px;">종료일 (선택, 비워두면 계속 반복)</label>
+      <input type="date" id="repeatEnd">
+    </div>
+
+    <div class="field">
+      <label>시간</label>
+      <div class="time-range-row">
+        <input id="entryHour" type="time" aria-label="시작시간" min="08:00" max="21:00" step="600">
+        <span class="time-range-sep">~</span>
+        <input id="entryEndHour" type="time" aria-label="종료시간" min="08:00" max="21:00" step="600">
+      </div>
+      
+    </div>
+
+    <div class="field">
+      <label>메모 (선택)</label>
+      <textarea id="entryMemo" placeholder="추가로 기록할 내용"></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn cancel" id="entryCancel">취소</button>
+      <button class="btn save" id="entrySave">저장</button>
+    </div>
+    <div class="btn-row" id="entryDeleteRow" style="display:none;">
+      <button class="btn delete" id="entryDelete">삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- Year/month jump sheet -->
+<div class="sheet-backdrop" id="jumpBackdrop">
+  <div class="sheet">
+    <h2>날짜로 이동</h2>
+    <div class="jump-row">
+      <div class="field">
+        <label>년도</label>
+        <input type="text" inputmode="numeric" id="jumpYear" placeholder="2026">
+      </div>
+      <div class="field">
+        <label>월</label>
+        <input type="text" inputmode="numeric" id="jumpMonth" placeholder="1-12">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn cancel" id="jumpCancel">취소</button>
+      <button class="btn save" id="jumpGo">이동</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom confirm/alert (native dialogs are unreliable in home-screen/standalone mode) -->
+<div class="sheet-backdrop" id="confirmBackdrop" style="align-items:center;">
+  <div class="confirm-box">
+    <p id="confirmMsg"></p>
+    <div class="btn-row" id="confirmBtns">
+      <button class="btn cancel" id="confirmNo">취소</button>
+      <button class="btn delete" id="confirmYes">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const SINGLE_KEY = 'nurseSchedule.singles.v2';
+  const RECUR_KEY = 'nurseSchedule.recurring.v2';
+
+  // ---------- Phone back button / history ----------
+  // Keep the PWA open: Back first closes the current sheet/dialog,
+  // and only moves through app states instead of exiting immediately.
+  let appHistoryDepth = 0;
+  let syncingAppHistory = false;
+  let handlingPopstate = false;
+  history.replaceState({ app: true, depth: 0 }, '', location.href);
+  function pushAppHistory(){
+    appHistoryDepth++;
+    history.pushState({ app: true, depth: appHistoryDepth }, '', location.href);
+  }
+  function consumeAppHistory(){
+    if(handlingPopstate) return;
+    if(appHistoryDepth > 0){
+      syncingAppHistory = true;
+      history.back();
+    }
+  }
+  function closeTopAppLayer(){
+    const confirm = document.getElementById('confirmBackdrop');
+    const entry = document.getElementById('entryBackdrop');
+    const jump = document.getElementById('jumpBackdrop');
+    if(confirm && confirm.classList.contains('open')){
+      if(typeof confirm._closeForBack === 'function') confirm._closeForBack();
+      else confirm.classList.remove('open');
+      confirmBtns && (confirmBtns.style.display='flex');
+      return true;
+    }
+    if(entry && entry.classList.contains('open')){ entry.classList.remove('open'); return true; }
+    if(jump && jump.classList.contains('open')){ jump.classList.remove('open'); return true; }
+    return false;
+  }
+  window.addEventListener('popstate', ()=>{
+    if(syncingAppHistory){
+      syncingAppHistory = false;
+      appHistoryDepth = Math.max(0, appHistoryDepth - 1);
+      return;
+    }
+    if(closeTopAppLayer()){
+      handlingPopstate = true;
+      appHistoryDepth = Math.max(0, appHistoryDepth - 1);
+      handlingPopstate = false;
+      return;
+    }
+    // No app layer is open. Keep one history entry so Back does not exit the PWA.
+    history.pushState({ app: true, depth: appHistoryDepth }, '', location.href);
+  });
+  function closeLayerWithHistory(el){
+    el.classList.remove('open');
+    consumeAppHistory();
+  }
+
+  function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+  const TYPE_COLOR = { facility: getCss('--facility'), visit: getCss('--visit') };
+
+  function loadJSON(key, fallback){
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+    catch(e){ return fallback; }
+  }
+  function saveJSON(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+
+  // ---------- Korean public holidays ----------
+  const YEAR_HOLIDAYS = {
+    2025: {
+      '2025-01-01':'신정','2025-01-27':'임시공휴일','2025-01-28':'설날 연휴','2025-01-29':'설날','2025-01-30':'설날 연휴',
+      '2025-03-01':'삼일절','2025-03-03':'대체공휴일',
+      '2025-05-05':'어린이날・부처님오신날','2025-05-06':'대체공휴일',
+      '2025-06-03':'대통령선거일','2025-06-06':'현충일',
+      '2025-08-15':'광복절',
+      '2025-10-03':'개천절','2025-10-05':'추석 연휴','2025-10-06':'추석','2025-10-07':'추석 연휴','2025-10-08':'대체공휴일','2025-10-09':'한글날',
+      '2025-12-25':'크리스마스'
+    },
+    2026: {
+      '2026-01-01':'신정','2026-02-16':'설날 연휴','2026-02-17':'설날','2026-02-18':'설날 연휴',
+      '2026-03-01':'삼일절','2026-03-02':'대체공휴일',
+      '2026-05-05':'어린이날','2026-05-24':'부처님오신날','2026-05-25':'대체공휴일',
+      '2026-06-03':'지방선거일','2026-06-06':'현충일',
+      '2026-07-17':'제헌절',
+      '2026-08-15':'광복절','2026-08-17':'대체공휴일',
+      '2026-09-24':'추석 연휴','2026-09-25':'추석','2026-09-26':'추석 연휴',
+      '2026-10-03':'개천절','2026-10-05':'대체공휴일','2026-10-09':'한글날',
+      '2026-12-25':'크리스마스'
+    },
+    2027: {
+      '2027-01-01':'신정','2027-02-06':'설날 연휴','2027-02-07':'설날','2027-02-08':'설날 연휴','2027-02-09':'설날 연휴',
+      '2027-03-01':'삼일절',
+      '2027-05-05':'어린이날','2027-05-13':'부처님오신날',
+      '2027-06-06':'현충일','2027-06-07':'대체공휴일',
+      '2027-07-17':'제헌절',
+      '2027-08-15':'광복절','2027-08-16':'대체공휴일',
+      '2027-09-14':'추석 연휴','2027-09-15':'추석','2027-09-16':'추석 연휴',
+      '2027-10-03':'개천절','2027-10-04':'대체공휴일','2027-10-09':'한글날','2027-10-11':'대체공휴일',
+      '2027-12-25':'크리스마스','2027-12-27':'대체공휴일'
+    }
+  };
+  const FIXED_ANNUAL = {
+    '01-01':'신정','03-01':'삼일절','05-05':'어린이날','06-06':'현충일',
+    '08-15':'광복절','10-03':'개천절','10-09':'한글날','12-25':'크리스마스'
+  };
+  function getHoliday(y,m,d){
+    const key = dkey(y,m,d);
+    if(YEAR_HOLIDAYS[y]) return YEAR_HOLIDAYS[y][key] || null;
+    const mmdd = pad(m+1)+'-'+pad(d);
+    if(mmdd==='07-17' && y>=2026) return '제헌절';
+    return FIXED_ANNUAL[mmdd] || null;
+  }
+
+  // singles: { 'YYYY-MM-DD': [ {id,type,memo} ] }
+  // recurring: [ {id,type,memo,days:[0..6],start:'YYYY-MM-DD',end:'YYYY-MM-DD'|null} ]
+  let singles = loadJSON(SINGLE_KEY, {});
+  let recurring = loadJSON(RECUR_KEY, []);
+
+  const today = new Date();
+  let viewYear = today.getFullYear();
+  let viewMonth = today.getMonth();
+  let selectedKey = dkey(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const monthLabel = document.getElementById('monthLabel');
+  const grid = document.getElementById('grid');
+
+  function pad(n){ return n<10 ? '0'+n : ''+n; }
+  function dkey(y,m,d){ return y+'-'+pad(m+1)+'-'+pad(d); }
+  function toDate(key){ const [y,m,d]=key.split('-').map(Number); return new Date(y,m-1,d); }
+
+  function typeLabel(type){ return type==='facility' ? '요양간호' : '방문간호'; }
+  function entryTitle(ent){ return typeLabel(ent.type); }
+  function getEndMinutes(ent){ return (ent.endHour===null || ent.endHour===undefined || ent.endHour==='') ? null : normalizeMinutes(ent.endHour); }
+  function normalizeMinutes(h){
+    if(h===null || h===undefined || h==='') return null;
+    const n = Number(h);
+    if(!Number.isFinite(n)) return null;
+    // 기존 저장값(0~23)은 정각 시간으로 보고, 새 저장값은 분 단위로 처리합니다.
+    return n <= 23 ? n * 60 : n;
+  }
+  function formatHour(h){
+    const mins = normalizeMinutes(h);
+    if(mins===null) return '';
+    const hh24 = Math.floor(mins / 60);
+    const mm = mins % 60;
+    const ampm = hh24 < 12 ? '오전' : '오후';
+    let hh = hh24 % 12; if(hh===0) hh = 12;
+    return ampm + ' ' + hh + ':' + String(mm).padStart(2,'0');
+  }
+  function sortByHour(list){
+    return list.slice().sort((a,b)=>{
+      const ha = (a.hour===null || a.hour===undefined) ? 99 : a.hour;
+      const hb = (b.hour===null || b.hour===undefined) ? 99 : b.hour;
+      return ha - hb;
+    });
+  }
+
+  function occurrencesForDate(y,m,d){
+    const key = dkey(y,m,d);
+    const list = [];
+    (singles[key]||[]).forEach(e => list.push(Object.assign({}, e, {key, recurring:false})));
+    const dow = new Date(y,m,d).getDay();
+    const dateObj = new Date(y,m,d); dateObj.setHours(0,0,0,0);
+    recurring.forEach(r=>{
+      if(!r.days.includes(dow)) return;
+      if(Array.isArray(r.skip) && r.skip.includes(key)) return;
+      if(r.start){ const s = toDate(r.start); s.setHours(0,0,0,0); if(dateObj < s) return; }
+      if(r.end){ const en = toDate(r.end); en.setHours(0,0,0,0); if(dateObj > en) return; }
+      list.push({id:r.id, type:r.type, memo:r.memo, color:r.color, hour:r.hour, endHour:r.endHour, key, recurring:true, ruleId:r.id});
+    });
+    return sortByHour(list);
+  }
+
+  function render(){
+    monthLabel.textContent = viewYear + '. ' + (viewMonth+1) + '.';
+    grid.innerHTML = '';
+
+    const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+    const cells = [];
+    for(let i=firstDow-1; i>=0; i--) cells.push({d: daysInPrevMonth-i, other:true, m:viewMonth-1});
+    for(let d=1; d<=daysInMonth; d++) cells.push({d, other:false, m:viewMonth});
+    let next=1;
+    while(cells.length % 7 !== 0) cells.push({d:next++, other:true, m:viewMonth+1});
+
+    grid.style.gridTemplateRows = 'repeat(' + (cells.length/7) + ',1fr)';
+
+    cells.forEach((cell, idx) => {
+      const norm = new Date(viewYear, cell.m, cell.d);
+      const y=norm.getFullYear(), m=norm.getMonth(), d=norm.getDate();
+      const dow = idx % 7;
+      const key = dkey(y,m,d);
+      const holidayName = getHoliday(y,m,d);
+
+      const div = document.createElement('div');
+      div.className = 'day' + (cell.other?' other':'') + (dow===0?' sun':'') + (dow===6?' sat':'') + (holidayName?' holiday':'');
+      if(norm.toDateString()===today.toDateString()) div.className += ' today';
+      if(key===selectedKey) div.className += ' selected';
+
+      const row = document.createElement('div');
+      row.className='daynum-row';
+      const numEl = document.createElement('div');
+      numEl.className='daynum'; numEl.textContent = d;
+      row.appendChild(numEl);
+      if(holidayName){
+        const h = document.createElement('div');
+        h.className='holiday-badge';
+        h.textContent = holidayName;
+        row.appendChild(h);
+      }
+      div.appendChild(row);
+
+      const list = occurrencesForDate(y,m,d);
+      const maxShow = 3;
+      list.slice(0,maxShow).forEach(ent=>{
+        const e = document.createElement('div');
+        e.className='entry';
+        e.style.background = ent.color || TYPE_COLOR[ent.type];
+        const text = ent.memo && ent.memo.trim() ? ent.memo.trim() : entryTitle(ent);
+        e.textContent = text;
+        div.appendChild(e);
+      });
+      if(list.length>maxShow){
+        const more=document.createElement('div');
+        more.className='more'; more.textContent='+'+(list.length-maxShow);
+        div.appendChild(more);
+      }
+
+      let longPressTimer = null;
+      let longPressTriggered = false;
+      let pressStartX = 0, pressStartY = 0;
+
+      const cancelLongPress = ()=>{
+        if(longPressTimer){ clearTimeout(longPressTimer); longPressTimer = null; }
+        div.classList.remove('long-pressing');
+      };
+
+      const startLongPress = (x, y)=>{
+        cancelLongPress();
+        pressStartX = x; pressStartY = y;
+        longPressTriggered = false;
+        div.classList.add('long-pressing');
+        longPressTimer = setTimeout(()=>{
+          longPressTimer = null;
+          longPressTriggered = true;
+          div.classList.remove('long-pressing');
+          selectedKey = key;
+          openEntrySheet(key, null);
+        }, 650);
+      };
+
+      div.addEventListener('touchstart', e=>{
+        if(e.touches.length !== 1) return;
+        const t=e.touches[0];
+        startLongPress(t.clientX,t.clientY);
+      }, {passive:true});
+
+      div.addEventListener('touchmove', e=>{
+        if(!longPressTimer || e.touches.length !== 1) return;
+        const t=e.touches[0];
+        if(Math.abs(t.clientX-pressStartX)>12 || Math.abs(t.clientY-pressStartY)>12) cancelLongPress();
+      }, {passive:true});
+
+      div.addEventListener('touchend', ()=>{
+        const wasLong=longPressTriggered;
+        cancelLongPress();
+        if(!wasLong){ selectedKey=key; render(); }
+        longPressTriggered=false;
+      }, {passive:true});
+
+      div.addEventListener('touchcancel', cancelLongPress, {passive:true});
+
+      div.addEventListener('click', e=>{
+        if(longPressTriggered){
+          e.preventDefault();
+          e.stopPropagation();
+          longPressTriggered=false;
+          return;
+        }
+        selectedKey=key;
+        render();
+      });
+
+      grid.appendChild(div);
+    });
+
+    renderPanel();
+  }
+
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- Bottom panel (auto-updates for the selected date) ----------
+  const panelDate = document.getElementById('panelDate');
+  const panelHoliday = document.getElementById('panelHoliday');
+  const panelList = document.getElementById('panelList');
+  const panelCount = document.getElementById('panelCount');
+
+  function renderPanel(){
+    const [y,m,d] = selectedKey.split('-').map(Number);
+    const dt = new Date(y, m-1, d);
+    const wd = ['일','월','화','수','목','금','토'][dt.getDay()];
+    panelDate.textContent = m+'월 '+d+'일 ('+wd+')';
+    const h = getHoliday(y, m-1, d);
+    panelHoliday.textContent = h || '';
+
+    panelList.innerHTML = '';
+    const list = occurrencesForDate(y, m-1, d);
+    panelCount.textContent = '일정 ' + list.length + '개';
+    if(list.length===0){
+      const p=document.createElement('div');
+      p.className='empty-hint'; p.textContent='등록된 일정이 없습니다.';
+      panelList.appendChild(p);
+      return;
+    }
+    list.forEach(ent=>{
+      const row = document.createElement('div');
+      row.className='entry-row';
+      const startText = ent.hour!==null && ent.hour!==undefined ? formatHour(ent.hour) : '';
+      const endText = getEndMinutes(ent)!==null ? formatHour(ent.endHour) : '';
+      const timeText = startText ? (endText ? startText+' ~ '+endText : startText) : '';
+      const timeHtml = timeText ? `<span class="time">${timeText}</span>` : '';
+      row.style.borderLeftColor = ent.color || TYPE_COLOR[ent.type];
+      row.innerHTML = `<div class="swatch" style="background:${ent.color || TYPE_COLOR[ent.type]}"></div>
+        <div class="info">${timeHtml}<span class="label">${escapeHtml(entryTitle(ent))}</span>${ent.memo?`<span class="memo">${escapeHtml(ent.memo)}</span>`:''}</div>
+        <button class="edit-btn" aria-label="일정 수정">수정</button>
+        <button class="del-btn" aria-label="일정 삭제">삭제</button>`;
+      row.querySelector('.edit-btn').addEventListener('click', ()=> openEntrySheet(ent.key, ent));
+      row.querySelector('.del-btn').addEventListener('click', ()=>{
+        showConfirm('이 일정을 삭제할까요?', ()=>{
+          if(ent.recurring){
+            const rule = recurring.find(r=>r.id===ent.ruleId);
+            if(rule){
+              rule.skip = Array.isArray(rule.skip) ? rule.skip : [];
+              if(!rule.skip.includes(ent.key)) rule.skip.push(ent.key);
+              saveJSON(RECUR_KEY, recurring);
+            }
+          } else {
+            const key = ent.key;
+            singles[key] = (singles[key]||[]).filter(e2=>e2.id!==ent.id);
+            if(singles[key].length===0) delete singles[key];
+            saveJSON(SINGLE_KEY, singles);
+          }
+          render();
+        });
+      });
+      panelList.appendChild(row);
+    });
+  }
+
+  // ---------- Entry sheet ----------
+  const entryBackdrop = document.getElementById('entryBackdrop');
+  const entrySheetTitle = document.getElementById('entrySheetTitle');
+  const typeToggle = document.getElementById('typeToggle');
+  const repeatToggle = document.getElementById('repeatToggle');
+  const weeklyField = document.getElementById('weeklyField');
+  const weekdayPicker = document.getElementById('weekdayPicker');
+  const repeatStart = document.getElementById('repeatStart');
+  const repeatEnd = document.getElementById('repeatEnd');
+  const entryMemo = document.getElementById('entryMemo');
+  const entryHour = document.getElementById('entryHour');
+  const entryEndHour = document.getElementById('entryEndHour');
+  const entryDeleteRow = document.getElementById('entryDeleteRow');
+  const colorPicker = document.getElementById('colorPicker');
+
+  function minutesToTimeValue(h){
+    const mins = normalizeMinutes(h);
+    if(mins===null) return '';
+    const hh = Math.floor(mins/60);
+    const mm = mins % 60;
+    return pad(hh)+':'+pad(mm);
+  }
+  function timeValueToMinutes(v){
+    if(!v) return null;
+    const parts = v.split(':').map(Number);
+    if(parts.length!==2 || !Number.isFinite(parts[0]) || !Number.isFinite(parts[1])) return null;
+    return parts[0]*60 + parts[1];
+  }
+  function validTenMinuteTime(v){
+    if(!v) return true;
+    const mins = timeValueToMinutes(v);
+    return mins!==null && mins>=8*60 && mins<=21*60 && mins%10===0;
+  }
+
+  let selectedType = 'facility';
+  let selectedColor = TYPE_COLOR.facility;
+  let repeatMode = 'once';
+  let selectedDays = new Set();
+  let editingSingleId = null;
+  let editingRuleId = null;
+  let currentEntryDate = null;
+
+  colorPicker.addEventListener('click', e=>{
+    const b = e.target.closest('.color-btn');
+    if(!b) return;
+    selectedColor = b.dataset.color;
+    renderColorPicker();
+  });
+
+  function renderColorPicker(){
+    [...colorPicker.children].forEach(b=>{
+      b.classList.toggle('selected', b.dataset.color.toLowerCase() === String(selectedColor).toLowerCase());
+    });
+  }
+
+  typeToggle.addEventListener('click', e=>{
+    const pill = e.target.closest('.type-pill');
+    if(!pill) return;
+    selectedType = pill.dataset.type;
+    updateTypeUI();
+  });
+  function updateTypeUI(){
+    [...typeToggle.children].forEach(p=> p.classList.toggle('selected', p.dataset.type===selectedType));
+  }
+
+  repeatToggle.addEventListener('click', e=>{
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    repeatMode = btn.dataset.mode;
+    updateRepeatUI();
+  });
+  function updateRepeatUI(){
+    [...repeatToggle.children].forEach(b=> b.classList.toggle('active', b.dataset.mode===repeatMode));
+    weeklyField.style.display = repeatMode==='weekly' ? 'block' : 'none';
+  }
+
+  weekdayPicker.addEventListener('click', e=>{
+    const b = e.target.closest('.wd-btn');
+    if(!b) return;
+    const d = Number(b.dataset.d);
+    if(selectedDays.has(d)) selectedDays.delete(d); else selectedDays.add(d);
+    renderWeekdayPicker();
+  });
+  function renderWeekdayPicker(){
+    [...weekdayPicker.children].forEach(b=> b.classList.toggle('active', selectedDays.has(Number(b.dataset.d))));
+  }
+
+  function openEntrySheet(dayKey, ent){
+    currentEntryDate = dayKey;
+    repeatStart.value = dayKey;
+    repeatEnd.value = '';
+    entryMemo.value = '';
+    entryHour.value = '';
+    entryEndHour.value = '';
+    editingSingleId = null;
+    editingRuleId = null;
+
+    if(ent && ent.recurring){
+      entrySheetTitle.textContent = '반복 일정 수정';
+      const rule = recurring.find(r=>r.id===ent.ruleId);
+      selectedType = rule.type;
+      selectedColor = rule.color || TYPE_COLOR[rule.type];
+      entryMemo.value = rule.memo || '';
+      entryHour.value = minutesToTimeValue(rule.hour);
+      entryEndHour.value = minutesToTimeValue(rule.endHour);
+      repeatMode = 'weekly';
+      selectedDays = new Set(rule.days);
+      repeatStart.value = rule.start || dayKey;
+      repeatEnd.value = rule.end || '';
+      editingRuleId = rule.id;
+      entryDeleteRow.style.display = 'flex';
+    } else if(ent){
+      entrySheetTitle.textContent = '일정 수정';
+      selectedType = ent.type;
+      selectedColor = ent.color || TYPE_COLOR[ent.type];
+      entryMemo.value = ent.memo || '';
+      entryHour.value = minutesToTimeValue(ent.hour);
+      entryEndHour.value = minutesToTimeValue(ent.endHour);
+      repeatMode = 'once';
+      selectedDays = new Set([toDate(dayKey).getDay()]);
+      editingSingleId = ent.id;
+      entryDeleteRow.style.display = 'flex';
+    } else {
+      entrySheetTitle.textContent = '일정 추가';
+      selectedType = 'facility';
+      selectedColor = TYPE_COLOR.facility;
+      repeatMode = 'once';
+      selectedDays = new Set([toDate(dayKey).getDay()]);
+      entryDeleteRow.style.display = 'none';
+    }
+    updateTypeUI();
+    renderColorPicker();
+    updateRepeatUI();
+    renderWeekdayPicker();
+    entryBackdrop.classList.add('open');
+    pushAppHistory();
+  }
+
+  document.getElementById('entryCancel').addEventListener('click', ()=> closeLayerWithHistory(entryBackdrop));
+  entryBackdrop.addEventListener('click', e=>{ if(e.target.id==='entryBackdrop') closeLayerWithHistory(entryBackdrop); });
+
+  document.getElementById('entrySave').addEventListener('click', ()=>{
+    if(!validTenMinuteTime(entryHour.value) || !validTenMinuteTime(entryEndHour.value)){
+      showAlert('시간은 10분 단위로 선택해 주세요.');
+      return;
+    }
+    const hourVal = timeValueToMinutes(entryHour.value);
+    const endHourVal = timeValueToMinutes(entryEndHour.value);
+    if(hourVal !== null && endHourVal !== null && endHourVal < hourVal){ showAlert('종료시간은 시작시간보다 같거나 늦게 선택해 주세요.'); return; }
+    if(repeatMode==='weekly'){
+      if(selectedDays.size===0){ showAlert('반복할 요일을 하나 이상 선택해 주세요.'); return; }
+      if(!repeatStart.value){ showAlert('시작일을 입력해 주세요.'); return; }
+      const rule = {
+        id: editingRuleId || ('r'+Date.now()+Math.random().toString(36).slice(2,7)),
+        type: selectedType,
+        memo: entryMemo.value.trim(),
+        color: selectedColor,
+        hour: hourVal,
+        endHour: endHourVal,
+        days: [...selectedDays],
+        start: repeatStart.value,
+        end: repeatEnd.value || null
+      };
+      if(editingRuleId){
+        const idx = recurring.findIndex(r=>r.id===editingRuleId);
+        if(idx>=0) recurring[idx] = rule; else recurring.push(rule);
+      } else {
+        recurring.push(rule);
+      }
+      saveJSON(RECUR_KEY, recurring);
+    } else {
+      const key = currentEntryDate;
+      if(!key){ showAlert('일정을 추가할 날짜가 없습니다.'); return; }
+      const obj = {
+        id: editingSingleId || ('e'+Date.now()+Math.random().toString(36).slice(2,7)),
+        type: selectedType,
+        memo: entryMemo.value.trim(),
+        color: selectedColor,
+        hour: hourVal,
+        endHour: endHourVal
+      };
+      if(editingSingleId){
+        Object.keys(singles).forEach(k=>{
+          singles[k] = (singles[k]||[]).filter(e2=> e2.id!==editingSingleId || k===key);
+        });
+      }
+      if(!singles[key]) singles[key]=[];
+      const idx = singles[key].findIndex(e2=>e2.id===obj.id);
+      if(idx>=0) singles[key][idx]=obj; else singles[key].push(obj);
+      saveJSON(SINGLE_KEY, singles);
+      selectedKey = key;
+    }
+    entryBackdrop.classList.remove('open');
+    consumeAppHistory();
+    render();
+  });
+
+  document.getElementById('entryDelete').addEventListener('click', ()=>{
+    showConfirm('이 일정을 삭제할까요?', ()=>{
+      if(editingRuleId){
+        const rule = recurring.find(r=>r.id===editingRuleId);
+        if(rule){
+          const key = currentEntryDate;
+          rule.skip = Array.isArray(rule.skip) ? rule.skip : [];
+          if(!rule.skip.includes(key)) rule.skip.push(key);
+          saveJSON(RECUR_KEY, recurring);
+        }
+      } else if(editingSingleId){
+        const key = currentEntryDate;
+        singles[key] = (singles[key]||[]).filter(e2=>e2.id!==editingSingleId);
+        if(singles[key].length===0) delete singles[key];
+        saveJSON(SINGLE_KEY, singles);
+      }
+      entryBackdrop.classList.remove('open');
+      consumeAppHistory();
+      render();
+    });
+  });
+
+  // ---------- Nav ----------
+  document.getElementById('prevBtn').addEventListener('click', ()=>{
+    viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;} render();
+  });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;} render();
+  });
+  document.getElementById('todayBtn').addEventListener('click', ()=>{
+    viewYear = today.getFullYear(); viewMonth = today.getMonth();
+    selectedKey = dkey(today.getFullYear(), today.getMonth(), today.getDate());
+    render();
+  });
+
+  // ---------- Theme toggle ----------
+  const themeBtn = document.getElementById('themeBtn');
+  const THEME_KEY = 'nurseSchedule.theme.v1';
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    themeBtn.textContent = t==='light' ? '☀️' : '🌙';
+    TYPE_COLOR.facility = getCss('--facility');
+    TYPE_COLOR.visit = getCss('--visit');
+    render();
+  }
+  let currentTheme = loadJSON(THEME_KEY, 'dark');
+  if(currentTheme !== 'light' && currentTheme !== 'dark') currentTheme = 'dark';
+  applyTheme(currentTheme);
+  themeBtn.addEventListener('click', ()=>{
+    currentTheme = currentTheme==='light' ? 'dark' : 'light';
+    saveJSON(THEME_KEY, currentTheme);
+    applyTheme(currentTheme);
+  });
+
+  // ---------- Custom confirm/alert (native dialogs can be unreliable in standalone/home-screen mode) ----------
+  const confirmBackdrop = document.getElementById('confirmBackdrop');
+  const confirmMsg = document.getElementById('confirmMsg');
+  const confirmBtns = document.getElementById('confirmBtns');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+  function showConfirm(msg, onYes){
+    confirmMsg.textContent = msg;
+    confirmBtns.style.display = 'flex';
+    confirmYes.textContent = '삭제';
+    confirmBackdrop.classList.add('open');
+    pushAppHistory();
+    const cleanup = ()=>{
+      confirmBackdrop.classList.remove('open');
+      consumeAppHistory();
+      confirmYes.removeEventListener('click', yesHandler);
+      confirmNo.removeEventListener('click', noHandler);
+      confirmBackdrop._closeForBack = null;
+    };
+    const yesHandler = ()=>{ cleanup(); onYes(); };
+    const noHandler = ()=>{ cleanup(); };
+    confirmBackdrop._closeForBack = ()=>{ cleanup(); };
+    confirmYes.addEventListener('click', yesHandler);
+    confirmNo.addEventListener('click', noHandler);
+  }
+  function showAlert(msg){
+    confirmMsg.textContent = msg;
+    confirmBtns.style.display = 'none';
+    confirmBackdrop.classList.add('open');
+    pushAppHistory();
+    const closeOnce = ()=>{
+      confirmBackdrop.classList.remove('open');
+      consumeAppHistory();
+      confirmBtns.style.display = 'flex';
+      confirmBackdrop.removeEventListener('click', closeOnce);
+      confirmBackdrop._closeForBack = null;
+    };
+    confirmBackdrop._closeForBack = closeOnce;
+    confirmBackdrop.addEventListener('click', closeOnce);
+  }
+
+  // ---------- Year/month jump ----------
+  const jumpBackdrop = document.getElementById('jumpBackdrop');
+  const jumpYear = document.getElementById('jumpYear');
+  const jumpMonth = document.getElementById('jumpMonth');
+  monthLabel.addEventListener('click', ()=>{
+    jumpYear.value = viewYear;
+    jumpMonth.value = viewMonth+1;
+    jumpBackdrop.classList.add('open');
+    pushAppHistory();
+  });
+  document.getElementById('jumpCancel').addEventListener('click', ()=> closeLayerWithHistory(jumpBackdrop));
+  jumpBackdrop.addEventListener('click', e=>{ if(e.target.id==='jumpBackdrop') closeLayerWithHistory(jumpBackdrop); });
+  document.getElementById('jumpGo').addEventListener('click', ()=>{
+    const y = parseInt(jumpYear.value, 10);
+    const m = parseInt(jumpMonth.value, 10);
+    if(!y || y<1900 || y>2200 || !m || m<1 || m>12){
+      showAlert('년도와 월을 올바르게 입력해 주세요 (예: 2026 / 9).');
+      return;
+    }
+    viewYear = y; viewMonth = m-1;
+    jumpBackdrop.classList.remove('open');
+    consumeAppHistory();
+    render();
+  });
+
+  // ---------- Swipe left/right to change month ----------
+  let touchStartX = null, touchStartY = null;
+  grid.addEventListener('contextmenu', e=>e.preventDefault());
+  grid.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, {passive:true});
+  grid.addEventListener('touchend', e=>{
+    if(touchStartX===null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    touchStartX = null; touchStartY = null;
+    if(Math.abs(dx) > 55 && Math.abs(dy) < 60){
+      if(dx < 0){ viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;} }
+      else { viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;} }
+      render();
+    }
+  }, {passive:true});
+
+  render();
+})();
+</script>
+</body>
+</html>
