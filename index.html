@@ -96,8 +96,8 @@
   .day.other{opacity:.35;}
   .day.holiday{background:rgba(255,107,122,.12);}
   .day.selected{box-shadow:inset 0 0 0 2px var(--accent);}
-  .daynum-row{display:flex;align-items:center;gap:4px;flex-shrink:0;height:18px;}
-  .daynum{font-size:13px;font-weight:600;color:var(--text-dim);flex-shrink:0;}
+  .daynum-row{display:flex;align-items:center;gap:4px;flex-shrink:0;height:16px;}
+  .daynum{font-size:12px;font-weight:600;color:var(--text-dim);flex-shrink:0;}
   .day.today .daynum{background:var(--accent);color:#0c1210;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;}
   .day.sun .daynum{color:var(--sun);}
   .day.sat .daynum{color:var(--sat);}
@@ -247,7 +247,7 @@
   .day.holiday{background:linear-gradient(180deg,rgba(255,115,128,.11),var(--surface));}
   .day.selected{box-shadow:inset 0 0 0 2px var(--accent),0 0 0 1px rgba(69,208,177,.14);}
   .day.today .daynum{box-shadow:0 3px 8px rgba(69,208,177,.24);}
-  .entry{border-radius:5px;padding:2px 4px;font-size:10px;box-shadow:0 2px 5px rgba(0,0,0,.10);}
+  .entry{border-radius:4px;padding:1px 3px;font-size:9px;line-height:1.05;min-height:12px;box-shadow:0 1px 4px rgba(0,0,0,.10);}
   .more{font-weight:700;}
   #bottomPanel{flex-basis:31%;background:linear-gradient(180deg,var(--surface),color-mix(in srgb,var(--surface) 88%,var(--accent) 12%));border-top:1px solid var(--line);padding:11px 13px calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.10);}
   .panel-header{margin-bottom:6px;align-items:center;}
@@ -288,7 +288,7 @@
   .btn.save{box-shadow:0 7px 16px rgba(69,208,177,.18);}
   @media (max-width:390px){
     .legend{display:none;} .title-row{gap:4px;} .icon-btn{padding:6px 7px;}
-.day{padding:4px 3px;} .entry{font-size:9.5px;}
+.day{padding:3px 2px;} .entry{font-size:8.5px;line-height:1.02;min-height:11px;padding:1px 3px;}
     #bottomPanel{padding-left:10px;padding-right:10px;} .entry-row{padding:8px 7px;}
   }
 
@@ -629,6 +629,17 @@
       <button class="btn cancel" id="confirmNo">취소</button>
       <button class="btn delete" id="confirmYes">삭제</button>
     </div>
+  </div>
+</div>
+
+
+<div class="backup-sheet" id="backupSheet" aria-hidden="true">
+  <div class="backup-card">
+    <div class="backup-head"><div><div class="backup-title">일정 백업 · 복원</div><div class="backup-sub">앱 업데이트나 휴대폰 변경 전에 일정을 안전하게 저장하세요.</div></div><button class="backup-close" id="backupClose" aria-label="닫기">×</button></div>
+    <button class="backup-action primary" id="backupExport">⬇ 일정 백업 파일 저장</button>
+    <button class="backup-action" id="backupImport">⬆ 백업 파일로 복원</button>
+    <div class="backup-note">백업 파일에는 현재 저장된 일정과 반복 일정이 포함됩니다. 복원하면 현재 일정이 백업 파일 내용으로 교체됩니다.</div>
+    <input type="file" id="backupFile" accept=".json,application/json" hidden>
   </div>
 </div>
 
@@ -1454,15 +1465,6 @@
 })();
 </script>
 
-<div class="backup-sheet" id="backupSheet" aria-hidden="true">
-  <div class="backup-card">
-    <div class="backup-head"><div><div class="backup-title">일정 백업 · 복원</div><div class="backup-sub">앱 업데이트나 휴대폰 변경 전에 일정을 안전하게 저장하세요.</div></div><button class="backup-close" id="backupClose" aria-label="닫기">×</button></div>
-    <button class="backup-action primary" id="backupExport">⬇ 일정 백업 파일 저장</button>
-    <button class="backup-action" id="backupImport">⬆ 백업 파일로 복원</button>
-    <div class="backup-note">백업 파일에는 현재 저장된 일정과 반복 일정이 포함됩니다. 복원하면 현재 일정이 백업 파일 내용으로 교체됩니다.</div>
-    <input type="file" id="backupFile" accept=".json,application/json" hidden>
-  </div>
-</div>
 
 </body>
 </html>
