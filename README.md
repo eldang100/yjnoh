@@ -1,24 +1,15 @@
-# 방문간호 일정관리
+# 방문간호 일정관리 PWA
 
-GitHub Pages에 올리면 iPhone/Android에서 홈 화면 앱처럼 사용할 수 있는 PWA입니다.
+## GitHub Pages 업데이트 방법
+1. 기존 GitHub 저장소의 파일을 이 폴더 내용으로 교체합니다.
+2. 특히 `index.html`, `sw.js`, `manifest.webmanifest`를 함께 교체해야 합니다.
+3. 기존 사용자는 앱을 삭제하지 않습니다.
+4. 기존과 같은 GitHub Pages 주소로 앱을 실행하면 새 버전이 자동으로 확인·적용됩니다.
+5. 일정 데이터는 브라우저의 LocalStorage에 있으므로 같은 기기/같은 사이트 주소에서 업데이트하면 기존 일정이 유지됩니다.
 
-## GitHub Pages
-1. 이 폴더의 파일을 GitHub 저장소 루트에 업로드합니다.
-2. GitHub → Settings → Pages → Deploy from a branch → main / root 선택.
-3. 생성된 `https://사용자.github.io/저장소명/` 주소를 휴대폰에서 엽니다.
+## 일정 백업
+`💾 백업` 버튼에서 JSON 파일로 일정만 별도 백업/복원할 수 있습니다.
+앱 자체(디자인/기능)를 백업하는 기능은 아닙니다.
 
-## iPhone
-Safari에서 주소를 연 뒤 `공유` → `홈 화면에 추가`를 선택합니다.
-앱 아이콘은 `icons/icon-180.png`가 사용됩니다.
-
-## Android
-브라우저가 설치 가능한 상태를 감지하면 화면 오른쪽 아래의 `홈 화면에 추가` 버튼을 눌러 설치할 수 있습니다.
-
-## 포함된 기능
-- 방문간호 일정관리 원본 기능 유지
-- PWA manifest
-- 홈 화면 아이콘
-- iPhone용 apple-touch-icon
-- Android/Chrome 설치 프롬프트
-- iPhone용 홈 화면 추가 안내
-- 기본 오프라인 캐시(service worker)
+## 주의
+앱을 삭제하거나 브라우저 사이트 데이터를 삭제하면 LocalStorage 일정이 없어질 수 있습니다. 이 경우 백업 JSON으로 복원하세요.
