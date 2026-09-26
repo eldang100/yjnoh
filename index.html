@@ -507,8 +507,8 @@
     <div class="field">
       <label>구분</label>
       <div class="type-toggle" id="typeToggle">
-        <div class="type-pill facility" data-type="facility">요양간호</div>
         <div class="type-pill visit" data-type="visit">방문간호</div>
+        <div class="type-pill facility" data-type="facility">요양간호</div>
       </div>
     </div>
 
@@ -1224,8 +1224,8 @@
     return mins!==null && mins>=8*60 && mins<=21*60 && mins%10===0;
   }
 
-  let selectedType = 'facility';
-  let selectedColor = TYPE_COLOR.facility;
+  let selectedType = 'visit';
+  let selectedColor = TYPE_COLOR.visit;
   let repeatMode = 'once';
   let selectedDays = new Set();
   let editingSingleId = null;
@@ -1314,8 +1314,8 @@
       entryDeleteRow.style.display = 'flex';
     } else {
       entrySheetTitle.textContent = '일정 추가';
-      selectedType = 'facility';
-      selectedColor = TYPE_COLOR.facility;
+      selectedType = 'visit';
+      selectedColor = TYPE_COLOR.visit;
       repeatMode = 'once';
       selectedDays = new Set([toDate(dayKey).getDay()]);
       entryDeleteRow.style.display = 'none';
