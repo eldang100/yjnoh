@@ -780,6 +780,72 @@
   let singles = loadJSON(SINGLE_KEY, null);
   let recurring = loadJSON(RECUR_KEY, null);
 
+  // 오래된 버전/다른 저장형식의 데이터가 남아 있어도 앱이 멈추지 않도록 정규화합니다.
+  // 잘못된 반복일정 한 건 때문에 달력 전체가 비어 보이는 문제를 방지합니다.
+  function normalizeScheduleData(){
+    let changed = false;
+
+    // 1회 일정은 반드시 { 'YYYY-MM-DD': Array } 형태로 맞춥니다.
+    if(!singles || typeof singles !== 'object' || Array.isArray(singles)){
+      singles = {};
+      changed = true;
+    } else {
+      const cleanSingles = {};
+      Object.keys(singles).forEach(key=>{
+        const list = Array.isArray(singles[key]) ? singles[key] : [];
+        if(!Array.isArray(singles[key])) changed = true;
+        cleanSingles[key] = list.filter(e=>e && typeof e==='object').map(e=>({
+          id: e.id || ('e'+Math.random().toString(36).slice(2)),
+          type: e.type==='visit' ? 'visit' : 'facility',
+          memo: typeof e.memo==='string' ? e.memo : '',
+          color: e.color || null,
+          hour: e.hour ?? null,
+          endHour: e.endHour ?? null
+        }));
+      });
+      if(JSON.stringify(cleanSingles)!==JSON.stringify(singles)) changed = true;
+      singles = cleanSingles;
+    }
+
+    // 반복일정은 배열이어야 하며 days가 없거나 잘못된 항목은 안전하게 건너뜁니다.
+    if(!Array.isArray(recurring)){
+      if(recurring && typeof recurring==='object'){
+        recurring = Object.values(recurring);
+      } else {
+        recurring = [];
+      }
+      changed = true;
+    }
+    recurring = recurring.filter(r=>r && typeof r==='object').map(r=>{
+      let days = Array.isArray(r.days) ? r.days : [];
+      if(!days.length){
+        const legacyDay = r.weekday ?? r.dayOfWeek ?? r.dow;
+        if(legacyDay!==undefined && legacyDay!==null && legacyDay!=='') days=[legacyDay];
+      }
+      days = [...new Set(days.map(Number).filter(n=>Number.isInteger(n) && n>=0 && n<=6))];
+      if(JSON.stringify(days)!==JSON.stringify(r.days||[])) changed = true;
+      return {
+        id: r.id || ('r'+Math.random().toString(36).slice(2)),
+        type: r.type==='visit' ? 'visit' : 'facility',
+        memo: typeof r.memo==='string' ? r.memo : '',
+        color: r.color || null,
+        hour: r.hour ?? null,
+        endHour: r.endHour ?? null,
+        days,
+        start: typeof r.start==='string' ? r.start : null,
+        end: typeof r.end==='string' ? r.end : null,
+        skip: Array.isArray(r.skip) ? r.skip.filter(x=>typeof x==='string') : []
+      };
+    }).filter(r=>r.days.length>0);
+
+    if(changed){
+      try{
+        localStorage.setItem(SINGLE_KEY, JSON.stringify(singles));
+        localStorage.setItem(RECUR_KEY, JSON.stringify(recurring));
+      }catch(e){}
+    }
+  }
+
   // 앱 버전 업데이트 시 일정 자동 복구
   // 같은 기기/같은 브라우저의 PWA 업데이트는 localStorage가 유지되지만,
   // 데이터 저장키가 바뀌거나 한쪽 키가 비어 있는 경우를 대비해 내부 자동백업에서 복구합니다.
@@ -799,6 +865,7 @@
     if(singles===null) singles={};
     if(recurring===null) recurring=[];
   })();
+  normalizeScheduleData();
 
   const today = new Date();
   let viewYear = today.getFullYear();
@@ -845,8 +912,8 @@
     (singles[key]||[]).forEach(e => list.push(Object.assign({}, e, {key, recurring:false})));
     const dow = new Date(y,m,d).getDay();
     const dateObj = new Date(y,m,d); dateObj.setHours(0,0,0,0);
-    recurring.forEach(r=>{
-      if(!r.days.includes(dow)) return;
+    (Array.isArray(recurring) ? recurring : []).forEach(r=>{
+      if(!r || !Array.isArray(r.days) || !r.days.includes(dow)) return;
       if(Array.isArray(r.skip) && r.skip.includes(key)) return;
       if(r.start){ const s = toDate(r.start); s.setHours(0,0,0,0); if(dateObj < s) return; }
       if(r.end){ const en = toDate(r.end); en.setHours(0,0,0,0); if(dateObj > en) return; }
