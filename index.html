@@ -463,6 +463,8 @@
 
 
 </style>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#10a88f">
 </head>
 <body>
 
@@ -647,6 +649,8 @@
 (function(){
   const SINGLE_KEY = 'nurseSchedule.singles.v2';
   const RECUR_KEY = 'nurseSchedule.recurring.v2';
+  const AUTO_BACKUP_KEY = 'nurseSchedule.autoBackup.v1';
+  const APP_DATA_VERSION = 2;
 
   // ---------- Phone back button / history ----------
   // Keep the PWA open: Back first closes the current sheet/dialog,
@@ -707,7 +711,23 @@
     try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
     catch(e){ return fallback; }
   }
-  function saveJSON(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+  function saveJSON(key, val){
+    try{
+      localStorage.setItem(key, JSON.stringify(val));
+      // 일정 데이터가 저장될 때마다 앱 내부에도 최신 복사본을 보관합니다.
+      // 새 버전 앱에서 저장키가 바뀌거나 데이터가 초기화되어도 자동 복구할 수 있습니다.
+      if(key===SINGLE_KEY || key===RECUR_KEY){
+        const autoPayload={
+          backupFormat:'bangmun-ganho-auto',
+          version:APP_DATA_VERSION,
+          savedAt:new Date().toISOString(),
+          singles: loadJSON(SINGLE_KEY,{}),
+          recurring: loadJSON(RECUR_KEY,[])
+        };
+        localStorage.setItem(AUTO_BACKUP_KEY, JSON.stringify(autoPayload));
+      }
+    }catch(e){}
+  }
 
   // ---------- Korean public holidays ----------
   const YEAR_HOLIDAYS = {
@@ -757,8 +777,28 @@
 
   // singles: { 'YYYY-MM-DD': [ {id,type,memo} ] }
   // recurring: [ {id,type,memo,days:[0..6],start:'YYYY-MM-DD',end:'YYYY-MM-DD'|null} ]
-  let singles = loadJSON(SINGLE_KEY, {});
-  let recurring = loadJSON(RECUR_KEY, []);
+  let singles = loadJSON(SINGLE_KEY, null);
+  let recurring = loadJSON(RECUR_KEY, null);
+
+  // 앱 버전 업데이트 시 일정 자동 복구
+  // 같은 기기/같은 브라우저의 PWA 업데이트는 localStorage가 유지되지만,
+  // 데이터 저장키가 바뀌거나 한쪽 키가 비어 있는 경우를 대비해 내부 자동백업에서 복구합니다.
+  (function restoreAutoBackup(){
+    if(singles !== null && recurring !== null) return;
+    try{
+      const raw=localStorage.getItem(AUTO_BACKUP_KEY);
+      if(!raw) return;
+      const payload=JSON.parse(raw);
+      if(payload && payload.backupFormat==='bangmun-ganho-auto' && payload.singles && Array.isArray(payload.recurring)){
+        if(singles===null) singles=payload.singles;
+        if(recurring===null) recurring=payload.recurring;
+        localStorage.setItem(SINGLE_KEY,JSON.stringify(singles));
+        localStorage.setItem(RECUR_KEY,JSON.stringify(recurring));
+      }
+    }catch(e){}
+    if(singles===null) singles={};
+    if(recurring===null) recurring=[];
+  })();
 
   const today = new Date();
   let viewYear = today.getFullYear();
@@ -1466,5 +1506,25 @@
 </script>
 
 
+
+<script>
+(() => {
+  if (!('serviceWorker' in navigator)) return;
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return;
+    if (sessionStorage.getItem('bangmun-sw-reloaded') === '1') return;
+    sessionStorage.setItem('bangmun-sw-reloaded', '1');
+    location.reload();
+  });
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+      await reg.update();
+      sessionStorage.removeItem('bangmun-sw-reloaded');
+    } catch (e) {}
+  });
+})();
+</script>
 </body>
 </html>
