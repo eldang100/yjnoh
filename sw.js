@@ -1,5 +1,9 @@
-const CACHE = 'bangmun-ganho-v4-auto-update';
-const CORE_ASSETS = ['./', './index.html', './manifest.webmanifest'];
+const CACHE = 'bangmun-ganho-v4-auto-fix-20260926';
+const CORE_ASSETS = [
+  './',
+  './index.html',
+  './manifest.webmanifest'
+];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -22,9 +26,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
 
-  // 앱 본체(HTML)는 항상 최신 버전을 먼저 확인한다.
+  // HTML은 항상 최신 버전을 먼저 확인합니다.
   if (event.request.mode === 'navigate' || url.pathname.endsWith('/index.html')) {
     event.respondWith(
       fetch(event.request, { cache: 'no-store' })
@@ -35,7 +38,7 @@ self.addEventListener('fetch', event => {
           }
           return response;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match('./index.html').then(r => r || caches.match('./')))
     );
     return;
   }
@@ -44,7 +47,7 @@ self.addEventListener('fetch', event => {
     caches.match(event.request).then(cached => {
       if (cached) return cached;
       return fetch(event.request).then(response => {
-        if (response && response.ok) {
+        if (response && response.ok && url.origin === self.location.origin) {
           const copy = response.clone();
           caches.open(CACHE).then(cache => cache.put(event.request, copy));
         }
