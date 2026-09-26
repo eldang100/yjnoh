@@ -60,13 +60,23 @@
     border-bottom:1px solid var(--line);
   }
   .title-row{display:flex;align-items:center;gap:5px;}
+  .title-actions{margin-left:auto;display:flex;align-items:center;gap:4px;flex-shrink:0;}
   .title-row button{background:none;border:none;color:var(--text-dim);font-size:18px;padding:4px 6px;cursor:pointer;line-height:1;}
   .title-row h1{font-size:14.5px;font-weight:700;margin:0;text-align:center;cursor:pointer;white-space:nowrap;flex-shrink:0;}
   .icon-btn{background:var(--surface2);border:1px solid var(--line);border-radius:14px;font-size:12px;padding:5px 7px;cursor:pointer;color:var(--text);flex-shrink:0;}
   .legend{display:flex;gap:7px;flex:1;justify-content:center;font-size:10.5px;color:var(--text-dim);overflow:hidden;}
   .legend span{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
   .legend i{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
-  .weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:6px 4px 2px;font-size:11px;color:var(--text-dim);}
+   .month-stats{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0;height:46px;overflow:visible;transform:translateY(0);margin-left:6px;}
+   .month-stat{min-width:50px;height:42px;padding:3px 9px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1;box-sizing:border-box;box-shadow:0 2px 7px rgba(0,0,0,.10);}
+   .month-stat span{font-size:13px;font-weight:900;line-height:15px;white-space:nowrap;}
+   .month-stat b{font-size:17px;font-weight:950;line-height:19px;white-space:nowrap;}
+   .month-stat.visit{color:#1769aa;background:rgba(74,167,245,.16);border-color:rgba(74,167,245,.50);}
+   .month-stat.facility{color:#a86d05;background:rgba(241,184,75,.18);border-color:rgba(241,184,75,.55);}
+   .month-stat.total{color:#087d69;background:rgba(69,208,177,.16);border-color:rgba(69,208,177,.50);}
+   .month-stat:active{transform:translateY(1px);}
+   .panel-right-meta .panel-holiday{margin-right:4px;}
+   .weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:6px 4px 2px;font-size:11px;color:var(--text-dim);}
   .weekdays div{text-align:center;padding:1px 0;}
   .weekdays div:first-child{color:var(--sun);}
   .weekdays div:last-child{color:var(--sat);}
@@ -112,9 +122,29 @@
     flex-direction:column;
     background:var(--surface);
     border-top:1px solid var(--line);
-    padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
+    padding:6px 14px calc(10px + env(safe-area-inset-bottom,0px));
     min-height:0;
+    transition:flex-basis .24s ease, padding .24s ease;
+    touch-action:pan-y;
   }
+  #bottomPanel.collapsed{
+    flex:0 0 30px;
+    padding:3px 10px calc(3px + env(safe-area-inset-bottom,0px));
+    overflow:hidden;
+    cursor:pointer;
+  }
+  #bottomPanel.collapsed .panel-header,
+  #bottomPanel.collapsed .panel-divider,
+  #bottomPanel.collapsed #panelList{display:none;}
+  .panel-collapse-handle{
+    width:100%;height:24px;flex:0 0 24px;border:0;background:transparent;color:var(--text-dim);
+    font-size:10px;font-weight:800;letter-spacing:.1px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:5px;
+    touch-action:none;
+  }
+  .panel-collapse-handle span{font-size:9px;font-weight:700;}
+  #bottomPanel.collapsed .panel-collapse-handle{color:var(--accent);}
+  #bottomPanel.collapsed .panel-collapse-handle span{display:inline;}
   .panel-header{display:flex;align-items:baseline;justify-content:space-between;flex-shrink:0;margin-bottom:4px;}
   .panel-date{font-size:16px;font-weight:800;}
   .panel-meta{font-size:11px;color:var(--text-dim);margin-top:2px;}
@@ -435,14 +465,14 @@
   /* 상단 좁은 화면에서도 방문/요양 범례가 가려지지 않도록 고정 공간 확보 */
   .title-row{gap:4px;}
   .title-row h1{font-size:14.5px;letter-spacing:-.45px;padding:0 4px;}
-  .legend{flex:0 0 62px;min-width:62px;justify-content:center;gap:5px;overflow:visible;font-size:10px;}
+  .legend{flex:1 1 auto;min-width:48px;justify-content:center;gap:6px;overflow:visible;font-size:10px;}
   .legend span{gap:2px;}
   .backup-menu-btn{font-size:10px!important;padding:5px 7px!important;}
   .theme-menu-btn{font-size:10px!important;padding:5px 7px!important;}
   @media (max-width:370px){
     .title-row{gap:3px;}
     .title-row h1{font-size:13.5px;padding:0 2px;}
-    .legend{flex-basis:58px;min-width:58px;font-size:9.5px;gap:4px;}
+    .legend{min-width:44px;font-size:9.5px;gap:4px;}
     .backup-menu-btn{font-size:9.5px!important;padding:5px 6px!important;}
     .theme-menu-btn{font-size:9.5px!important;padding:5px 6px!important;}
   }
@@ -473,12 +503,11 @@
     <button id="prevBtn" aria-label="이전 달">‹</button>
     <h1 id="monthLabel"></h1>
     <button id="nextBtn" aria-label="다음 달">›</button>
-    <div class="legend">
-      <span><i style="background:var(--visit)"></i>방문</span>
-      <span><i style="background:var(--facility)"></i>요양</span>
+    <div class="legend" aria-label="일정 종류"><span><i style="background:var(--visit)"></i>방문</span><span><i style="background:var(--facility)"></i>요양</span></div>
+    <div class="title-actions">
+      <button class="icon-btn backup-menu-btn" id="backupBtn" aria-label="일정 백업 및 복원">💾 백업</button>
+      <button class="icon-btn theme-menu-btn" id="themeBtn" aria-label="테마 변경">◐ 모드</button>
     </div>
-    <button class="icon-btn backup-menu-btn" id="backupBtn" aria-label="일정 백업 및 복원">💾 백업</button>
-    <button class="icon-btn theme-menu-btn" id="themeBtn" aria-label="테마 변경">◐ 모드</button>
   </div>
   <div class="weekdays">
     <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
@@ -488,12 +517,13 @@
 <div id="grid"></div>
 
 <div id="bottomPanel">
+  <button type="button" class="panel-collapse-handle" id="panelCollapseHandle" aria-label="달력 크게 보기">⌄ <span>달력 크게 보기</span></button>
   <div class="panel-header">
     <div class="panel-title-wrap">
       <div class="panel-date-line"><span class="panel-date" id="panelDate"></span><span class="panel-today-badge" id="panelTodayBadge" style="display:none;">TODAY</span></div>
       <div class="panel-meta"><span id="panelCount">일정 0개</span><span class="panel-dot">·</span><span id="panelSummary">방문 0 · 요양 0</span></div>
     </div>
-    <div class="panel-right-meta"><div class="panel-holiday" id="panelHoliday"></div><button class="panel-add-mini" id="panelQuickAdd" aria-label="이 날짜에 일정 추가">＋</button></div>
+    <div class="panel-right-meta"><div class="panel-holiday" id="panelHoliday"></div><div class="month-stats" id="monthStats" aria-label="이번 달 일정 통계"><div class="month-stat visit" id="monthVisitCount"><span>방문</span><b>0</b></div><div class="month-stat facility" id="monthFacilityCount"><span>요양</span><b>0</b></div><div class="month-stat total" id="monthTotalCount"><span>월</span><b>0</b></div></div></div>
   </div>
   <div class="panel-divider"></div>
   <div id="panelList"></div>
@@ -924,6 +954,7 @@
 
   function render(){
     monthLabel.textContent = viewYear + '년 ' + (viewMonth+1) + '월';
+    renderMonthStats();
     grid.innerHTML = '';
 
     const firstDow = new Date(viewYear, viewMonth, 1).getDay();
@@ -1051,6 +1082,55 @@
   const panelCount = document.getElementById('panelCount');
   const panelSummary = document.getElementById('panelSummary');
   const panelTodayBadge = document.getElementById('panelTodayBadge');
+  const monthVisitCount = document.getElementById('monthVisitCount');
+  const monthFacilityCount = document.getElementById('monthFacilityCount');
+  const monthTotalCount = document.getElementById('monthTotalCount');
+  const bottomPanel = document.getElementById('bottomPanel');
+  const panelCollapseHandle = document.getElementById('panelCollapseHandle');
+
+  function renderMonthStats(){
+    let visit = 0, facility = 0;
+    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    for(let d=1; d<=daysInMonth; d++){
+      const list = occurrencesForDate(viewYear, viewMonth, d);
+      visit += list.filter(e=>e.type==='visit').length;
+      facility += list.filter(e=>e.type==='facility').length;
+    }
+    const total = visit + facility;
+    if(monthVisitCount) monthVisitCount.innerHTML = '<span>방문</span><b>' + visit + '</b>'; 
+    if(monthFacilityCount) monthFacilityCount.innerHTML = '<span>요양</span><b>' + facility + '</b>'; 
+    if(monthTotalCount) monthTotalCount.innerHTML = '<span>월</span><b>' + total + '</b>'; 
+  }
+
+  function setCalendarFocusMode(collapsed){
+    if(!bottomPanel) return;
+    bottomPanel.classList.toggle('collapsed', !!collapsed);
+    panelCollapseHandle.innerHTML = collapsed ? '⌃ <span>아래 부분을 눌러 일정 보기</span>' : '⌄ <span>달력 크게 보기</span>';
+  }
+
+  panelCollapseHandle.addEventListener('click', e=>{
+    e.stopPropagation();
+    setCalendarFocusMode(!bottomPanel.classList.contains('collapsed'));
+  });
+  bottomPanel.addEventListener('click', e=>{
+    if(bottomPanel.classList.contains('collapsed')) setCalendarFocusMode(false);
+  });
+
+  let panelTouchStartY = null, panelTouchStartX = null;
+  bottomPanel.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    panelTouchStartY = e.touches[0].clientY;
+    panelTouchStartX = e.touches[0].clientX;
+  }, {passive:true});
+  bottomPanel.addEventListener('touchend', e=>{
+    if(panelTouchStartY===null || e.changedTouches.length!==1) return;
+    const dy = e.changedTouches[0].clientY - panelTouchStartY;
+    const dx = e.changedTouches[0].clientX - panelTouchStartX;
+    panelTouchStartY = panelTouchStartX = null;
+    if(!bottomPanel.classList.contains('collapsed') && dy > 45 && Math.abs(dy) > Math.abs(dx)*1.15){
+      setCalendarFocusMode(true);
+    }
+  }, {passive:true});
 
   function renderPanel(){
     const [y,m,d] = selectedKey.split('-').map(Number);
@@ -1419,10 +1499,8 @@
     viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;} render();
   });
   const quickAddBtn = document.getElementById('quickAddBtn');
-  const panelQuickAdd = document.getElementById('panelQuickAdd');
   function quickAddSelected(){ openEntrySheet(selectedKey, null); }
   if(quickAddBtn) quickAddBtn.addEventListener('click', quickAddSelected);
-  if(panelQuickAdd) panelQuickAdd.addEventListener('click', quickAddSelected);
 
   // ---------- Theme toggle ----------
   const themeBtn = document.getElementById('themeBtn');
