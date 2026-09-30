@@ -137,13 +137,14 @@
   #bottomPanel.collapsed .panel-divider,
   #bottomPanel.collapsed #panelList{display:none;}
   .panel-collapse-handle{
-    width:100%;height:24px;flex:0 0 24px;border:0;background:transparent;color:var(--text-dim);
-    font-size:10px;font-weight:800;letter-spacing:.1px;cursor:pointer;
+    width:max-content;height:28px;flex:0 0 28px;border:1px solid var(--line);background:var(--surface2);color:var(--text-dim);
+    font-size:11px;font-weight:900;letter-spacing:.1px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;gap:5px;
-    touch-action:none;
+    padding:0 12px;border-radius:14px;align-self:center;
+    touch-action:manipulation;box-shadow:0 1px 4px rgba(0,0,0,.08);
   }
-  .panel-collapse-handle span{font-size:9px;font-weight:700;}
-  #bottomPanel.collapsed .panel-collapse-handle{color:var(--accent);}
+  .panel-collapse-handle span{font-size:11px;font-weight:900;}
+  #bottomPanel.collapsed .panel-collapse-handle{color:var(--accent);border-color:var(--accent);background:var(--surface);}
   #bottomPanel.collapsed .panel-collapse-handle span{display:inline;}
   .panel-header{display:flex;align-items:baseline;justify-content:space-between;flex-shrink:0;margin-bottom:4px;}
   .panel-date{font-size:16px;font-weight:800;}
@@ -517,7 +518,7 @@
 <div id="grid"></div>
 
 <div id="bottomPanel">
-  <button type="button" class="panel-collapse-handle" id="panelCollapseHandle" aria-label="달력 크게 보기">⌄ <span>달력 크게 보기</span></button>
+  <button type="button" class="panel-collapse-handle" id="panelCollapseHandle" aria-label="일정 접기">⌃ <span>일정 접기</span></button>
   <div class="panel-header">
     <div class="panel-title-wrap">
       <div class="panel-date-line"><span class="panel-date" id="panelDate"></span><span class="panel-today-badge" id="panelTodayBadge" style="display:none;">TODAY</span></div>
@@ -1105,32 +1106,14 @@
   function setCalendarFocusMode(collapsed){
     if(!bottomPanel) return;
     bottomPanel.classList.toggle('collapsed', !!collapsed);
-    panelCollapseHandle.innerHTML = collapsed ? '⌃ <span>아래 부분을 눌러 일정 보기</span>' : '⌄ <span>달력 크게 보기</span>';
+    panelCollapseHandle.innerHTML = collapsed ? '⌄ <span>일정 펼치기</span>' : '⌃ <span>일정 접기</span>';
+    panelCollapseHandle.setAttribute('aria-label', collapsed ? '일정 펼치기' : '일정 접기');
   }
 
   panelCollapseHandle.addEventListener('click', e=>{
     e.stopPropagation();
     setCalendarFocusMode(!bottomPanel.classList.contains('collapsed'));
   });
-  bottomPanel.addEventListener('click', e=>{
-    if(bottomPanel.classList.contains('collapsed')) setCalendarFocusMode(false);
-  });
-
-  let panelTouchStartY = null, panelTouchStartX = null;
-  bottomPanel.addEventListener('touchstart', e=>{
-    if(e.touches.length!==1) return;
-    panelTouchStartY = e.touches[0].clientY;
-    panelTouchStartX = e.touches[0].clientX;
-  }, {passive:true});
-  bottomPanel.addEventListener('touchend', e=>{
-    if(panelTouchStartY===null || e.changedTouches.length!==1) return;
-    const dy = e.changedTouches[0].clientY - panelTouchStartY;
-    const dx = e.changedTouches[0].clientX - panelTouchStartX;
-    panelTouchStartY = panelTouchStartX = null;
-    if(!bottomPanel.classList.contains('collapsed') && dy > 45 && Math.abs(dy) > Math.abs(dx)*1.15){
-      setCalendarFocusMode(true);
-    }
-  }, {passive:true});
 
   function renderPanel(){
     const [y,m,d] = selectedKey.split('-').map(Number);
