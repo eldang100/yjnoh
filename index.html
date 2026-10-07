@@ -545,6 +545,7 @@
         <div class="type-pill visit" data-type="visit">방문간호</div>
         <div class="type-pill facility" data-type="facility">요양간호</div>
       </div>
+      <div class="hint">구분은 선택사항입니다. 선택하지 않고 메모만 등록할 수 있습니다.</div>
     </div>
 
     <div class="field">
@@ -831,7 +832,7 @@
         if(!Array.isArray(singles[key])) changed = true;
         cleanSingles[key] = list.filter(e=>e && typeof e==='object').map(e=>({
           id: e.id || ('e'+Math.random().toString(36).slice(2)),
-          type: e.type==='visit' ? 'visit' : 'facility',
+          type: e.type==='visit' ? 'visit' : (e.type==='facility' ? 'facility' : null),
           memo: typeof e.memo==='string' ? e.memo : '',
           color: e.color || null,
           hour: e.hour ?? null,
@@ -861,7 +862,7 @@
       if(JSON.stringify(days)!==JSON.stringify(r.days||[])) changed = true;
       return {
         id: r.id || ('r'+Math.random().toString(36).slice(2)),
-        type: r.type==='visit' ? 'visit' : 'facility',
+        type: r.type==='visit' ? 'visit' : (r.type==='facility' ? 'facility' : null),
         memo: typeof r.memo==='string' ? r.memo : '',
         color: r.color || null,
         hour: r.hour ?? null,
@@ -914,7 +915,7 @@
   function dkey(y,m,d){ return y+'-'+pad(m+1)+'-'+pad(d); }
   function toDate(key){ const [y,m,d]=key.split('-').map(Number); return new Date(y,m-1,d); }
 
-  function typeLabel(type){ return type==='facility' ? '요양간호' : '방문간호'; }
+  function typeLabel(type){ return type==='facility' ? '요양간호' : (type==='visit' ? '방문간호' : '메모'); }
   function entryTitle(ent){ return typeLabel(ent.type); }
   function getEndMinutes(ent){ return (ent.endHour===null || ent.endHour===undefined || ent.endHour==='') ? null : normalizeMinutes(ent.endHour); }
   function normalizeMinutes(h){
@@ -1009,7 +1010,7 @@
       list.slice(0,maxShow).forEach(ent=>{
         const e = document.createElement('div');
         e.className='entry';
-        e.style.background = ent.color || TYPE_COLOR[ent.type];
+        e.style.background = ent.color || (TYPE_COLOR[ent.type] || 'var(--text-sub)');
         const text = ent.memo && ent.memo.trim() ? ent.memo.trim() : entryTitle(ent);
         e.textContent = text;
         div.appendChild(e);
@@ -1192,8 +1193,8 @@
       const endText = getEndMinutes(ent)!==null ? formatHour(ent.endHour) : '';
       const timeText = startText ? (endText ? startText+' ~ '+endText : startText) : '';
       const timeHtml = timeText ? `<span class="time">${timeText}</span>` : '';
-      row.style.borderLeftColor = ent.color || TYPE_COLOR[ent.type];
-      row.innerHTML = `<div class="swatch" style="background:${ent.color || TYPE_COLOR[ent.type]}"></div>
+      row.style.borderLeftColor = ent.color || (TYPE_COLOR[ent.type] || 'var(--text-sub)');
+      row.innerHTML = `<div class="swatch" style="background:${ent.color || (TYPE_COLOR[ent.type] || 'var(--text-sub)')}"></div>
         <div class="info">${timeHtml}<span class="label">${escapeHtml(entryTitle(ent))}</span>${ent.memo?`<span class="memo">${escapeHtml(ent.memo)}</span>`:''}</div>
         <button class="edit-btn" aria-label="일정 수정">수정</button>
         <button class="del-btn" aria-label="일정 삭제">삭제</button>`;
@@ -1336,8 +1337,8 @@
     return mins!==null && mins>=8*60 && mins<=21*60 && mins%10===0;
   }
 
-  let selectedType = 'visit';
-  let selectedColor = TYPE_COLOR.visit;
+  let selectedType = null;
+  let selectedColor = null;
   let repeatMode = 'once';
   let selectedDays = new Set();
   let editingSingleId = null;
@@ -1360,8 +1361,10 @@
   typeToggle.addEventListener('click', e=>{
     const pill = e.target.closest('.type-pill');
     if(!pill) return;
-    selectedType = pill.dataset.type;
+    selectedType = (selectedType === pill.dataset.type) ? null : pill.dataset.type;
+    if(selectedType && !selectedColor) selectedColor = TYPE_COLOR[selectedType];
     updateTypeUI();
+    renderColorPicker();
   });
   function updateTypeUI(){
     [...typeToggle.children].forEach(p=> p.classList.toggle('selected', p.dataset.type===selectedType));
@@ -1426,8 +1429,8 @@
       entryDeleteRow.style.display = 'flex';
     } else {
       entrySheetTitle.textContent = '일정 추가';
-      selectedType = 'visit';
-      selectedColor = TYPE_COLOR.visit;
+      selectedType = null;
+      selectedColor = null;
       repeatMode = 'once';
       selectedDays = new Set([toDate(dayKey).getDay()]);
       entryDeleteRow.style.display = 'none';
@@ -1453,6 +1456,7 @@
     const hourVal = timeValueToMinutes(entryHour.value);
     const endHourVal = timeValueToMinutes(entryEndHour.value);
     if(hourVal !== null && endHourVal !== null && endHourVal < hourVal){ showAlert('종료시간은 시작시간보다 같거나 늦게 선택해 주세요.'); return; }
+    if(!selectedType && !entryMemo.value.trim()){ showAlert('구분을 선택하지 않을 경우 메모 내용을 입력해 주세요.'); return; }
     if(repeatMode==='weekly'){
       if(selectedDays.size===0){ showAlert('반복할 요일을 하나 이상 선택해 주세요.'); return; }
       if(!repeatStart.value){ showAlert('시작일을 입력해 주세요.'); return; }
