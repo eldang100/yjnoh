@@ -186,7 +186,8 @@
   .field input[type=text], .field input[type=date], .field select, .field textarea{
     width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px 12px;font-size:15px;font-family:inherit;
   }
-  .field textarea{resize:vertical;min-height:56px;}
+  .field textarea{resize:vertical;min-height:56px;color:var(--text);background:var(--surface2);caret-color:var(--text);}
+  .field textarea::placeholder{color:var(--text-dim);opacity:1;}
 
   .type-toggle{display:flex;gap:8px;}
   .type-pill{flex:1;text-align:center;padding:12px 8px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;border:2px solid transparent;color:#0c0e12;}
@@ -1010,7 +1011,10 @@
       list.slice(0,maxShow).forEach(ent=>{
         const e = document.createElement('div');
         e.className='entry';
-        e.style.background = ent.color || (TYPE_COLOR[ent.type] || 'var(--text-sub)');
+        const entryBg = ent.color || (TYPE_COLOR[ent.type] || 'var(--text-sub)');
+        e.style.background = entryBg;
+        e.style.color = getAutoTextColor(entryBg);
+        e.style.fontWeight = '700';
         const text = ent.memo && ent.memo.trim() ? ent.memo.trim() : entryTitle(ent);
         e.textContent = text;
         div.appendChild(e);
@@ -1082,7 +1086,18 @@
     renderPanel();
   }
 
-  function escapeHtml(s){
+  function getAutoTextColor(bg){
+  if(!bg) return 'var(--text)';
+  const m = String(bg).trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if(!m) return 'var(--text)';
+  let h=m[1];
+  if(h.length===3) h=h.split('').map(x=>x+x).join('');
+  const r=parseInt(h.slice(0,2),16), g=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16);
+  const lum=(0.299*r+0.587*g+0.114*b);
+  return lum >= 155 ? '#111827' : '#ffffff';
+}
+
+function escapeHtml(s){
     return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
