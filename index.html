@@ -76,7 +76,8 @@
    .month-stat.total{color:#087d69;background:rgba(69,208,177,.16);border-color:rgba(69,208,177,.50);}
    .month-stat:active{transform:translateY(1px);}
    .panel-right-meta .panel-holiday{margin-right:4px;}
-   .weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:6px 4px 2px;font-size:11px;color:var(--text-dim);}
+   @media(max-width:390px){.manager-count-btn{min-width:58px;padding:3px 5px;font-size:10px}.manager-count-btn b{font-size:15px}.panel-right-meta{gap:4px}.month-stats{gap:4px;margin-left:2px}.month-stat{min-width:43px;padding:3px 6px;}}
+  .weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:6px 4px 2px;font-size:11px;color:var(--text-dim);}
   .weekdays div{text-align:center;padding:1px 0;}
   .weekdays div:first-child{color:var(--sun);}
   .weekdays div:last-child{color:var(--sat);}
@@ -292,6 +293,24 @@
   .panel-meta{display:flex;align-items:center;gap:5px;margin-top:1px;font-size:10.5px;}
   .panel-dot{opacity:.5;}
   .panel-right-meta{display:flex;align-items:center;gap:6px;align-self:center;}
+  .manager-count-btn{height:42px;min-width:72px;padding:3px 9px;border:1px solid rgba(139,92,246,.48);border-radius:10px;background:rgba(139,92,246,.12);color:#7650bd;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:12px;font-weight:900;line-height:1;box-shadow:0 2px 7px rgba(0,0,0,.09);white-space:nowrap;}
+  .manager-count-btn b{font-size:17px;line-height:19px;}
+  .manager-modal{position:fixed;inset:0;z-index:10060;background:rgba(0,0,0,.58);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+  .manager-modal.open{display:flex;}
+  .manager-box{width:100%;max-width:420px;max-height:78vh;display:flex;flex-direction:column;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 16px 50px rgba(0,0,0,.28);}
+  .manager-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px;}
+  .manager-head h2{font-size:17px;margin:0;font-weight:900;}
+  .manager-close{border:1px solid var(--line);border-radius:9px;background:var(--surface2);color:var(--text);font-size:18px;width:32px;height:32px;}
+  .manager-subtitle{font-size:12px;color:var(--text-dim);margin-bottom:12px;}
+  .manager-list{overflow-y:auto;min-height:0;}
+  .manager-person{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 10px;margin:6px 0;border:1px solid var(--line);border-radius:11px;background:var(--surface2);}
+  .manager-name{font-size:13px;font-weight:850;min-width:0;overflow-wrap:anywhere;}
+  .manager-counts{display:flex;gap:5px;flex-shrink:0;font-size:11px;font-weight:850;}
+  .manager-counts span{padding:5px 7px;border-radius:8px;white-space:nowrap;}
+  .manager-counts .visit{color:#1769aa;background:rgba(74,167,245,.16);}
+  .manager-counts .facility{color:#a86d05;background:rgba(241,184,75,.18);}
+  .manager-empty{padding:22px 8px;text-align:center;color:var(--text-dim);font-size:13px;}
+  .manager-unassigned{font-size:11px;color:var(--text-dim);padding-top:9px;border-top:1px solid var(--line);margin-top:8px;}
   .panel-holiday{font-size:11px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .panel-add-mini{width:34px;height:34px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#06251e;font-size:20px;font-weight:800;box-shadow:0 5px 14px rgba(69,208,177,.20);}
   .panel-divider{height:1px;background:var(--line);margin:0 0 3px;}
@@ -528,10 +547,20 @@
       <div class="panel-date-line"><span class="panel-date" id="panelDate"></span><span class="panel-today-badge" id="panelTodayBadge" style="display:none;">TODAY</span></div>
       <div class="panel-meta"><span id="panelCount">일정 0개</span><span class="panel-dot">·</span><span id="panelSummary">방문 0 · 요양 0</span></div>
     </div>
-    <div class="panel-right-meta"><div class="panel-holiday" id="panelHoliday"></div><div class="month-stats" id="monthStats" aria-label="이번 달 일정 통계"><div class="month-stat visit" id="monthVisitCount"><span>방문</span><b>0</b></div><div class="month-stat facility" id="monthFacilityCount"><span>요양</span><b>0</b></div><div class="month-stat total" id="monthTotalCount"><span>월</span><b>0</b></div></div></div>
+    <div class="panel-right-meta"><div class="panel-holiday" id="panelHoliday"></div><button type="button" class="manager-count-btn" id="managerCountBtn"><span>관리 몇명</span><b id="managerCountValue">0</b></button><div class="month-stats" id="monthStats" aria-label="이번 달 일정 통계"><div class="month-stat visit" id="monthVisitCount"><span>방문</span><b>0</b></div><div class="month-stat facility" id="monthFacilityCount"><span>요양</span><b>0</b></div><div class="month-stat total" id="monthTotalCount"><span>월</span><b>0</b></div></div></div>
   </div>
   <div class="panel-divider"></div>
   <div id="panelList"></div>
+</div>
+
+<!-- Monthly managed-person summary -->
+<div class="manager-modal" id="managerModal" role="dialog" aria-modal="true" aria-labelledby="managerModalTitle">
+  <div class="manager-box">
+    <div class="manager-head"><h2 id="managerModalTitle">이번 달 관리 현황</h2><button type="button" class="manager-close" id="managerModalClose" aria-label="닫기">×</button></div>
+    <div class="manager-subtitle" id="managerModalSubtitle">등록된 사람별 방문·요양 일정</div>
+    <div class="manager-list" id="managerModalList"></div>
+    <div class="manager-unassigned" id="managerUnassigned"></div>
+  </div>
 </div>
 
 <!-- Add/Edit entry sheet -->
@@ -711,6 +740,8 @@
     const confirm = document.getElementById('confirmBackdrop');
     const entry = document.getElementById('entryBackdrop');
     const jump = document.getElementById('jumpBackdrop');
+    const manager = document.getElementById('managerModal');
+    if(manager && manager.classList.contains('open')){ manager.classList.remove('open'); return true; }
     if(confirm && confirm.classList.contains('open')){
       if(typeof confirm._closeForBack === 'function') confirm._closeForBack();
       else confirm.classList.remove('open');
@@ -1114,6 +1145,65 @@ function escapeHtml(s){
   const bottomPanel = document.getElementById('bottomPanel');
   const panelCollapseHandle = document.getElementById('panelCollapseHandle');
 
+  function getMonthlyManagedPeople(){
+    const people = new Map();
+    let unnamed = 0;
+    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    for(let d=1; d<=daysInMonth; d++){
+      occurrencesForDate(viewYear, viewMonth, d).forEach(ent=>{
+        const name = String(ent.memo || '').trim();
+        if(!name){ unnamed++; return; }
+        if(!people.has(name)) people.set(name,{name,visit:0,facility:0,other:0,total:0});
+        const item = people.get(name);
+        if(ent.type==='visit') item.visit++;
+        else if(ent.type==='facility') item.facility++;
+        else item.other++;
+        item.total++;
+      });
+    }
+    return {people:[...people.values()].sort((a,b)=>a.name.localeCompare(b.name,'ko')),unnamed};
+  }
+
+  function renderManagerSummary(){
+    const data = getMonthlyManagedPeople();
+    const count = document.getElementById('managerCountValue');
+    if(count) count.textContent = data.people.length;
+    const list = document.getElementById('managerModalList');
+    const subtitle = document.getElementById('managerModalSubtitle');
+    const unassigned = document.getElementById('managerUnassigned');
+    if(!list) return;
+    if(subtitle) subtitle.textContent = (viewMonth+1)+'월 전체 일정 · 관리 인원 '+data.people.length+'명';
+    list.innerHTML='';
+    if(data.people.length===0){
+      list.innerHTML='<div class="manager-empty">이름이 메모에 입력된 일정이 없습니다.</div>';
+    }else{
+      data.people.forEach(person=>{
+        const row=document.createElement('div');
+        row.className='manager-person';
+        const name=document.createElement('div'); name.className='manager-name'; name.textContent=person.name;
+        const counts=document.createElement('div'); counts.className='manager-counts';
+        const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+person.visit+'개';
+        const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+person.facility+'개';
+        counts.append(visit,facility); row.append(name,counts); list.appendChild(row);
+      });
+    }
+    if(unassigned) unassigned.textContent = '이름(메모) 미입력 일정 '+data.unnamed+'개는 관리 인원에서 제외했습니다.';
+  }
+
+  const managerModal = document.getElementById('managerModal');
+  document.getElementById('managerCountBtn').addEventListener('click',()=>{
+    renderManagerSummary();
+    managerModal.classList.add('open');
+    pushAppHistory();
+  });
+  function closeManagerModal(){
+    if(!managerModal.classList.contains('open')) return;
+    managerModal.classList.remove('open');
+    consumeAppHistory();
+  }
+  document.getElementById('managerModalClose').addEventListener('click',closeManagerModal);
+  managerModal.addEventListener('click',e=>{if(e.target===managerModal) closeManagerModal();});
+
   function renderMonthStats(){
     let visit = 0, facility = 0;
     const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
@@ -1123,6 +1213,7 @@ function escapeHtml(s){
       facility += list.filter(e=>e.type==='facility').length;
     }
     const total = visit + facility;
+    renderManagerSummary();
     if(monthVisitCount) monthVisitCount.innerHTML = '<span>방문</span><b>' + visit + '</b>'; 
     if(monthFacilityCount) monthFacilityCount.innerHTML = '<span>요양</span><b>' + facility + '</b>'; 
     if(monthTotalCount) monthTotalCount.innerHTML = '<span>월</span><b>' + total + '</b>'; 
