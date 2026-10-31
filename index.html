@@ -308,6 +308,8 @@
   .manager-delete{flex-shrink:0;border:1px solid rgba(209,55,58,.35);border-radius:7px;background:rgba(209,55,58,.09);color:var(--danger);font-size:10px;font-weight:800;padding:5px 8px;}
   .manager-modal{position:fixed;inset:0;z-index:10060;background:rgba(0,0,0,.58);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
   .manager-modal.open{display:flex;}
+  /* 관리 팝업 안에서 삭제 확인창이 뒤로 가려지지 않도록 최상단에 표시 */
+  #confirmBackdrop{z-index:10080 !important;}
   .manager-box{width:100%;max-width:420px;max-height:78vh;display:flex;flex-direction:column;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 16px 50px rgba(0,0,0,.28);}
   .manager-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px;}
   .manager-head h2{font-size:17px;margin:0;font-weight:900;}
@@ -1168,10 +1170,21 @@ function escapeHtml(s){
     return entries;
   }
 
-  function getMonthlyManagedPeople(){
+  const MANAGER_HIDDEN_KEY = 'nurseSchedule.managerHiddenEntries.v1';
+  function getManagerHiddenEntries(){
+    try { const v=JSON.parse(localStorage.getItem(MANAGER_HIDDEN_KEY)||'[]'); return Array.isArray(v)?v:[]; }
+    catch(e){ return []; }
+  }
+  function managerEntryKey(ent){
+    return [ent.key || '', ent.recurring ? 'r' : 's', ent.recurring ? (ent.ruleId || ent.id || '') : (ent.id || ''), ent.type || '', String(ent.memo || '')].join('|');
+  }
+
+  function getMonthlyManagedPeople(includeHidden=false){
     const people = new Map();
     let unnamed = 0;
-    const calendarEntries = getCalendarMonthEntries();
+    const allCalendarEntries = getCalendarMonthEntries();
+    const hidden = new Set(getManagerHiddenEntries());
+    const calendarEntries = includeHidden ? allCalendarEntries : allCalendarEntries.filter(ent=>!hidden.has(managerEntryKey(ent)));
     calendarEntries.forEach(ent=>{
       const displayName = String(ent.memo || '').trim().replace(/\s+/g,' ');
       if(!displayName){ unnamed++; return; }
@@ -1187,34 +1200,27 @@ function escapeHtml(s){
     return {people:[...people.values()].sort((a,b)=>a.name.localeCompare(b.name,'ko')),unnamed,calendarEntries};
   }
 
+  // 관리 팝업에서만 숨깁니다. 실제 달력 일정과 반복 규칙은 변경하지 않습니다.
   function deleteManagerEntry(ent){
-    showConfirm('달력에서 이 날짜의 일정만 삭제할까요? 반복 일정의 다른 날짜와 기본 반복 설정은 유지됩니다.', ()=>{
-      if(ent.recurring){
-        const rule = recurring.find(r=>r.id===ent.ruleId);
-        if(rule){
-          rule.skip = Array.isArray(rule.skip) ? rule.skip : [];
-          if(!rule.skip.includes(ent.key)) rule.skip.push(ent.key);
-          saveJSON(RECUR_KEY, recurring);
-        }
-      }else{
-        singles[ent.key] = (singles[ent.key]||[]).filter(e=>e.id!==ent.id);
-        if(singles[ent.key].length===0) delete singles[ent.key];
-        saveJSON(SINGLE_KEY, singles);
-      }
-      render(); // 달력과 월간 숫자를 실제 달력 일정 기준으로 다시 계산
+    showConfirm('관리 목록에서만 이 내역을 삭제할까요? 달력 일정은 그대로 유지됩니다.', ()=>{
+      const hidden = getManagerHiddenEntries();
+      const key = managerEntryKey(ent);
+      if(!hidden.includes(key)) hidden.push(key);
+      localStorage.setItem(MANAGER_HIDDEN_KEY, JSON.stringify(hidden));
       renderManagerSummary();
     });
   }
 
   function renderManagerSummary(){
-    const data = getMonthlyManagedPeople();
+    const calendarData = getMonthlyManagedPeople(true);
+    const data = getMonthlyManagedPeople(false);
     const count = document.getElementById('managerCountValue');
-    if(count) count.textContent = data.people.length;
+    if(count) count.textContent = calendarData.people.length;
     const list = document.getElementById('managerModalList');
     const subtitle = document.getElementById('managerModalSubtitle');
     const unassigned = document.getElementById('managerUnassigned');
     if(!list) return;
-    if(subtitle) subtitle.textContent = (viewMonth+1)+'월 전체 일정 · 관리 '+data.people.length+'명';
+    if(subtitle) subtitle.textContent = (viewMonth+1)+'월 전체 일정 · 관리 '+calendarData.people.length+'명';
     list.innerHTML='';
     if(data.people.length===0){
       list.innerHTML='<div class="manager-empty">이름이 메모에 입력된 일정이 없습니다.</div>';
@@ -1243,7 +1249,7 @@ function escapeHtml(s){
         group.appendChild(details); list.appendChild(group);
       });
     }
-    if(unassigned) unassigned.textContent = '이름(메모) 미입력 일정 '+data.unnamed+'개는 관리 인원에서 제외했습니다.';
+    if(unassigned) unassigned.textContent = '팝업 표시 '+data.calendarEntries.length+'개 · 이름(메모) 미입력 일정 '+calendarData.unnamed+'개는 관리 인원에서 제외했습니다. 삭제한 내역은 달력에 그대로 남아 있습니다.';
   }
 
   const managerModal = document.getElementById('managerModal');
