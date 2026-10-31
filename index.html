@@ -76,7 +76,25 @@
    .month-stat.total{color:#087d69;background:rgba(69,208,177,.16);border-color:rgba(69,208,177,.50);}
    .month-stat:active{transform:translateY(1px);}
    .panel-right-meta .panel-holiday{margin-right:4px;}
-   @media(max-width:390px){.manager-count-btn{min-width:68px;padding:0 5px;font-size:10px;gap:3px}.manager-count-btn b{font-size:14px}.panel-right-meta{gap:4px}.month-stats{gap:4px;margin-left:2px}.month-stat{min-width:43px;padding:3px 6px;}}
+   @media(max-width:430px){
+    .panel-header{gap:4px;}
+    .panel-date{font-size:15px;letter-spacing:-.55px;}
+    .panel-today-badge{font-size:8px;padding:3px 5px;}
+    .manager-count-btn{height:38px;min-width:70px;padding:0 5px;font-size:10px;gap:3px;}
+    .manager-count-btn b{font-size:14px;}
+    .panel-right-meta{gap:3px;flex-shrink:0;}
+    .month-stats{height:40px;gap:3px;margin-left:1px;}
+    .month-stat{width:51px;min-width:51px;height:37px;padding:2px 3px;border-radius:9px;}
+    .month-stat span{font-size:11px;line-height:13px;}
+    .month-stat b{font-size:15px;line-height:17px;}
+  }
+  @media(max-width:360px){
+    .panel-date{font-size:14px;}
+    .manager-count-btn{min-width:64px;width:64px;}
+    .month-stat{width:46px;min-width:46px;}
+    .month-stat span{font-size:10px;}
+    .month-stat b{font-size:14px;}
+  }
   .weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:6px 4px 2px;font-size:11px;color:var(--text-dim);}
   .weekdays div{text-align:center;padding:1px 0;}
   .weekdays div:first-child{color:var(--sun);}
@@ -287,8 +305,9 @@
   #bottomPanel{flex-basis:31%;background:linear-gradient(180deg,var(--surface),color-mix(in srgb,var(--surface) 88%,var(--accent) 12%));border-top:1px solid var(--line);padding:2px 10px calc(7px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.10);}
   .panel-header{margin:0 1px 2px;align-items:center;min-height:38px;}
   .panel-title-wrap{min-width:0;}
-  .panel-date-line{display:flex;align-items:center;gap:7px;}
-  .panel-date{font-size:17px;letter-spacing:-.3px;line-height:1.05;}
+  .panel-date-line{display:flex;align-items:center;gap:6px;white-space:nowrap;flex-wrap:nowrap;}
+  .panel-title-wrap{flex:0 1 auto;min-width:0;}
+  .panel-date{font-size:16px;letter-spacing:-.45px;line-height:1.05;white-space:nowrap;flex-shrink:0;}
   .panel-today-badge{font-size:9px;font-weight:900;letter-spacing:.6px;color:#06251e;background:var(--accent);border-radius:20px;padding:3px 6px;}
   .panel-meta{display:flex;align-items:center;gap:5px;margin-top:1px;font-size:10.5px;}
   .panel-dot{opacity:.5;}
@@ -1891,6 +1910,14 @@ function escapeHtml(s){
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
     touchStartX = null; touchStartY = null;
+    if(dy > 75 && Math.abs(dy) > Math.abs(dx) * 1.25){
+      // Swipe down on the calendar: return to today's month and select today.
+      viewYear = today.getFullYear();
+      viewMonth = today.getMonth();
+      selectedKey = dkey(today.getFullYear(), today.getMonth(), today.getDate());
+      render();
+      return;
+    }
     if(Math.abs(dx) > 55 && Math.abs(dy) < 60){
       if(dx < 0){ viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;} }
       else { viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;} }
