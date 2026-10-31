@@ -1266,8 +1266,37 @@ function escapeHtml(s){
         group.appendChild(details); list.appendChild(group);
       });
     }
-    const unnamedCount = typeFilter ? calendarData.calendarEntries.filter(ent=>ent.type===typeFilter && !String(ent.memo||'').trim()).length : calendarData.unnamed;
-    if(unassigned) unassigned.textContent = '팝업 표시 '+data.calendarEntries.length+'개 · 이름(메모) 미입력 일정 '+unnamedCount+'개는 인원 집계에서 제외했습니다. 삭제한 내역은 달력에 그대로 남아 있습니다.';
+    // 메모(이름)가 없는 일정도 방문/요양 팝업에서 빠지지 않도록 별도 묶음으로 표시합니다.
+    const unnamedEntries = data.calendarEntries
+      .filter(ent=>!String(ent.memo||'').trim())
+      .sort((a,b)=>a.day-b.day || ((a.hour??99)-(b.hour??99)));
+    if(unnamedEntries.length){
+      const group=document.createElement('section'); group.className='manager-person-group';
+      const row=document.createElement('div'); row.className='manager-person';
+      const name=document.createElement('div'); name.className='manager-name'; name.textContent='이름(메모) 미입력';
+      const counts=document.createElement('div'); counts.className='manager-counts';
+      const visitCount=unnamedEntries.filter(ent=>ent.type==='visit').length;
+      const facilityCount=unnamedEntries.filter(ent=>ent.type==='facility').length;
+      const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+visitCount+'개';
+      const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+facilityCount+'개';
+      counts.append(visit,facility); row.append(name,counts); group.appendChild(row);
+      const details=document.createElement('div'); details.className='manager-details';
+      unnamedEntries.forEach(ent=>{
+        const detail=document.createElement('div'); detail.className='manager-detail';
+        const info=document.createElement('div'); info.className='manager-detail-info';
+        const date=document.createElement('span'); date.className='manager-detail-date'; date.textContent=viewMonth+1+'월 '+ent.day+'일';
+        const type=document.createElement('span'); type.className='manager-detail-type '+(ent.type==='visit'?'visit':(ent.type==='facility'?'facility':''));
+        type.textContent=ent.type==='visit'?'방문':(ent.type==='facility'?'요양':'기타');
+        info.append(date,type);
+        if(ent.hour!==null && ent.hour!==undefined){ const time=document.createElement('span'); time.className='manager-detail-date'; time.textContent=' · '+formatHour(ent.hour)+(ent.endHour!==null && ent.endHour!==undefined?'~'+formatHour(ent.endHour):''); info.append(time); }
+        const del=document.createElement('button'); del.type='button'; del.className='manager-delete'; del.textContent='삭제';
+        del.addEventListener('click',()=>deleteManagerEntry(ent));
+        detail.append(info,del); details.appendChild(detail);
+      });
+      group.appendChild(details); list.appendChild(group);
+    }
+    const unnamedCount = unnamedEntries.length;
+    if(unassigned) unassigned.textContent = '팝업 표시 '+data.calendarEntries.length+'개 · 이름(메모) 미입력 일정 '+unnamedCount+'개도 아래에 표시했습니다. 삭제한 내역은 달력에 그대로 남아 있습니다.';
   }
 
   const managerModal = document.getElementById('managerModal');
