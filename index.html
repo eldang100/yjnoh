@@ -317,28 +317,28 @@
   .manager-person-group{margin:7px 0 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);overflow:hidden;}
   .manager-person{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid var(--line);}
   .manager-person-group:last-child .manager-person{border-bottom:0;}
-  .manager-details{padding:3px 9px 8px;}
-  .manager-detail{display:flex;align-items:center;gap:7px;padding:7px 2px;border-top:1px dashed var(--line);font-size:11px;}
+  .manager-details{padding:2px 7px 5px;display:none;} .manager-person-group.expanded .manager-details{display:block;} .manager-expand{flex-shrink:0;width:22px;height:22px;border:0;background:transparent;color:var(--text-dim);font-size:17px;font-weight:900;padding:0;line-height:1;} .manager-person-group.expanded .manager-expand{transform:rotate(180deg);}
+  .manager-detail{display:flex;align-items:center;gap:6px;padding:6px 2px;border-top:1px dashed var(--line);font-size:12px;}
   .manager-detail-info{min-width:0;flex:1;overflow-wrap:anywhere;}
-  .manager-detail-date{color:var(--text-dim);font-size:10px;margin-right:5px;}
+  .manager-detail-date{color:var(--text-dim);font-size:11px;margin-right:4px;}
   .manager-detail-type{font-weight:850;}
   .manager-detail-type.visit{color:#398bd0;}
   .manager-detail-type.facility{color:#bd861f;}
-  .manager-delete{flex-shrink:0;border:1px solid rgba(209,55,58,.35);border-radius:7px;background:rgba(209,55,58,.09);color:var(--danger);font-size:10px;font-weight:800;padding:5px 8px;}
+  .manager-delete{flex-shrink:0;border:1px solid rgba(209,55,58,.35);border-radius:7px;background:rgba(209,55,58,.09);color:var(--danger);font-size:11px;font-weight:800;padding:4px 7px;}
   .manager-modal{position:fixed;inset:0;z-index:10060;background:rgba(0,0,0,.58);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
   .manager-modal.open{display:flex;}
   /* 관리 팝업 안에서 삭제 확인창이 뒤로 가려지지 않도록 최상단에 표시 */
   #confirmBackdrop{z-index:10080 !important;}
-  .manager-box{width:100%;max-width:420px;max-height:78vh;display:flex;flex-direction:column;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 16px 50px rgba(0,0,0,.28);}
+  .manager-box{width:100%;max-width:420px;max-height:78vh;display:flex;flex-direction:column;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 16px 50px rgba(0,0,0,.28);}
   .manager-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px;}
-  .manager-head h2{font-size:17px;margin:0;font-weight:900;}
+  .manager-head h2{font-size:18px;margin:0;font-weight:900;}
   .manager-close{border:1px solid var(--line);border-radius:9px;background:var(--surface2);color:var(--text);font-size:18px;width:32px;height:32px;}
-  .manager-subtitle{font-size:12px;color:var(--text-dim);margin-bottom:12px;}
+  .manager-subtitle{font-size:13px;color:var(--text-dim);margin-bottom:8px;}
   .manager-list{overflow-y:auto;min-height:0;}
-  .manager-person{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 10px;margin:6px 0;border:1px solid var(--line);border-radius:11px;background:var(--surface2);}
-  .manager-name{font-size:13px;font-weight:850;min-width:0;overflow-wrap:anywhere;}
-  .manager-counts{display:flex;gap:5px;flex-shrink:0;font-size:11px;font-weight:850;}
-  .manager-counts span{padding:5px 7px;border-radius:8px;white-space:nowrap;}
+  .manager-person{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 9px;margin:4px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface2);cursor:pointer;}
+  .manager-name{font-size:14px;font-weight:900;min-width:0;overflow-wrap:anywhere;}
+  .manager-counts{display:flex;gap:4px;flex-shrink:0;font-size:12px;font-weight:900;}
+  .manager-counts span{padding:4px 6px;border-radius:7px;white-space:nowrap;}
   .manager-counts .visit{color:#1769aa;background:rgba(74,167,245,.16);}
   .manager-counts .facility{color:#a86d05;background:rgba(241,184,75,.18);}
   .manager-empty{padding:22px 8px;text-align:center;color:var(--text-dim);font-size:13px;}
@@ -1239,14 +1239,14 @@ function escapeHtml(s){
     const data = {
       ...rawData,
       people: rawData.people.map(person=>{
-        const entries = typeFilter ? person.entries.filter(ent=>ent.type===typeFilter) : person.entries;
+        const entries = (typeFilter==='visit' || typeFilter==='facility') ? person.entries.filter(ent=>ent.type===typeFilter) : person.entries;
         return {...person, entries,
           visit: entries.filter(ent=>ent.type==='visit').length,
           facility: entries.filter(ent=>ent.type==='facility').length,
           other: entries.filter(ent=>ent.type!=='visit' && ent.type!=='facility').length,
           total: entries.length};
       }).filter(person=>person.entries.length>0),
-      calendarEntries: typeFilter ? rawData.calendarEntries.filter(ent=>ent.type===typeFilter) : rawData.calendarEntries
+      calendarEntries: (typeFilter==='visit' || typeFilter==='facility') ? rawData.calendarEntries.filter(ent=>ent.type===typeFilter) : rawData.calendarEntries
     };
     const count = document.getElementById('managerCountValue');
     if(count) count.textContent = calendarData.people.length;
@@ -1255,8 +1255,8 @@ function escapeHtml(s){
     const unassigned = document.getElementById('managerUnassigned');
     if(!list) return;
     const modalTitle = document.getElementById('managerModalTitle');
-    if(modalTitle) modalTitle.textContent = typeFilter==='visit' ? '이번 달 방문 일정' : (typeFilter==='facility' ? '이번 달 요양 일정' : '이번 달 관리 현황');
-    if(subtitle) subtitle.textContent = (viewMonth+1)+'월 '+(typeFilter==='visit'?'방문':(typeFilter==='facility'?'요양':'전체'))+' 일정 · '+data.people.length+'명';
+    if(modalTitle) modalTitle.textContent = typeFilter==='visit' ? '이번 달 방문 일정' : (typeFilter==='facility' ? '이번 달 요양 일정' : (typeFilter==='summary' ? '이번 달 요약' : '이번 달 관리 현황'));
+    if(subtitle) subtitle.textContent = (viewMonth+1)+'월 '+(typeFilter==='visit'?'방문':(typeFilter==='facility'?'요양':(typeFilter==='summary'?'전체 요약':'전체')))+' 일정 · '+data.people.length+'명';
     list.innerHTML='';
     if(data.people.length===0){
       list.innerHTML='<div class="manager-empty">이름이 메모에 입력된 일정이 없습니다.</div>';
@@ -1268,7 +1268,8 @@ function escapeHtml(s){
         const counts=document.createElement('div'); counts.className='manager-counts';
         const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+person.visit+'개';
         const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+person.facility+'개';
-        counts.append(visit,facility); row.append(name,counts); group.appendChild(row);
+        counts.append(visit,facility); const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
+        row.addEventListener('click',()=>{group.classList.toggle('expanded'); expand.setAttribute('aria-label',group.classList.contains('expanded')?'내용 접기':'내용 펼치기');});
         const details=document.createElement('div'); details.className='manager-details';
         person.entries.sort((a,b)=>a.day-b.day || ((a.hour??99)-(b.hour??99))).forEach(ent=>{
           const detail=document.createElement('div'); detail.className='manager-detail';
@@ -1298,7 +1299,8 @@ function escapeHtml(s){
       const facilityCount=unnamedEntries.filter(ent=>ent.type==='facility').length;
       const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+visitCount+'개';
       const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+facilityCount+'개';
-      counts.append(visit,facility); row.append(name,counts); group.appendChild(row);
+      counts.append(visit,facility); const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
+      row.addEventListener('click',()=>{group.classList.toggle('expanded'); expand.setAttribute('aria-label',group.classList.contains('expanded')?'내용 접기':'내용 펼치기');});
       const details=document.createElement('div'); details.className='manager-details';
       unnamedEntries.forEach(ent=>{
         const detail=document.createElement('div'); detail.className='manager-detail';
@@ -1327,6 +1329,7 @@ function escapeHtml(s){
   document.getElementById('managerCountBtn').addEventListener('click',()=>openManagerModal());
   if(monthVisitCount) monthVisitCount.addEventListener('click',()=>openManagerModal('visit'));
   if(monthFacilityCount) monthFacilityCount.addEventListener('click',()=>openManagerModal('facility'));
+  if(monthTotalCount) monthTotalCount.addEventListener('click',()=>openManagerModal('summary'));
   function closeManagerModal(){
     if(!managerModal.classList.contains('open')) return;
     managerModal.classList.remove('open');
