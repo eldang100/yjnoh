@@ -77,8 +77,8 @@
    .month-stat:active{transform:translateY(1px);}
    .panel-right-meta .panel-holiday{margin-right:4px;}
    @media(max-width:430px){
-    .manager-person{grid-template-columns:minmax(0,1fr) 174px 20px;gap:5px;padding:8px;}
-    .manager-counts{width:174px;gap:3px;font-size:10px;}
+    .manager-person{grid-template-columns:minmax(0,1fr) 142px 36px;gap:9px;padding:9px 10px;}
+    .manager-counts{width:142px;gap:5px;font-size:10px;}
     .manager-counts span{padding:5px 2px;}
     .manager-name{font-size:13px;}
     .panel-header{gap:4px;}
@@ -340,13 +340,31 @@
   .manager-close{border:1px solid var(--line);border-radius:9px;background:var(--surface2);color:var(--text);font-size:18px;width:32px;height:32px;}
   .manager-subtitle{font-size:13px;color:var(--text-dim);margin-bottom:8px;}
   .manager-list{overflow-y:auto;min-height:0;}
-  .manager-person{display:grid;grid-template-columns:minmax(0,1fr) 148px 22px;align-items:center;gap:7px;padding:8px 9px;margin:4px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface2);cursor:pointer;}
+  .manager-person{display:grid;grid-template-columns:minmax(0,1fr) 148px 36px;align-items:center;gap:10px;padding:9px 10px;margin:5px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface2);cursor:pointer;}
   .manager-name{font-size:14px;font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .manager-counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;width:164px;min-width:0;font-size:12px;font-weight:900;}
   .manager-counts span{display:block;text-align:center;padding:5px 3px;border-radius:7px;white-space:nowrap;}
   .manager-counts .visit{color:#1769aa;background:rgba(74,167,245,.16);}
   .manager-counts .facility{color:#a86d05;background:rgba(241,184,75,.18);}
   .manager-counts .other{color:#168a7d;background:rgba(79,179,169,.18);}
+  .manager-expand{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;margin-left:2px;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .manager-person{grid-template-columns:minmax(0,1fr) 148px 36px;column-gap:10px;}
+  .manager-month-summary{grid-template-columns:minmax(70px,1fr) minmax(0,3fr) 36px;column-gap:10px;padding:10px;}
+  .manager-month-summary .manager-counts{width:100%;min-width:0;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;}
+  .manager-month-summary .manager-counts span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:clip;padding:7px 2px;font-size:11px;line-height:1.15;border-radius:8px;}
+  @media(max-width:430px){
+    .manager-person{grid-template-columns:minmax(0,1fr) 142px 36px;column-gap:9px;padding:9px 10px;}
+    .manager-counts{width:142px;font-size:10px;gap:5px;}
+    .manager-month-summary{grid-template-columns:minmax(66px,1fr) minmax(0,3fr) 36px;column-gap:8px;}
+    .manager-month-summary .manager-counts{width:100%;gap:3px;}
+    .manager-month-summary .manager-counts span{font-size:9px;padding:6px 1px;}
+  }
+  @media(max-width:360px){
+    .manager-person{grid-template-columns:minmax(0,1fr) 128px 34px;column-gap:6px;padding:8px;}
+    .manager-counts{width:128px;font-size:9px;}
+    .manager-month-summary{grid-template-columns:minmax(60px,1fr) minmax(0,3fr) 34px;column-gap:6px;}
+    .manager-month-summary .manager-counts span{font-size:8px;}
+  }
   .manager-empty{padding:22px 8px;text-align:center;color:var(--text-dim);font-size:13px;}
   .manager-unassigned{font-size:11px;color:var(--text-dim);padding-top:9px;border-top:1px solid var(--line);margin-top:8px;}
   .panel-holiday{font-size:11px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1274,7 +1292,7 @@ function escapeHtml(s){
       if(monthEntries.length===0) list.innerHTML='<div class="manager-empty">이번 달 등록된 일정이 없습니다.</div>';
       else{
         const group=document.createElement('section'); group.className='manager-person-group';
-        const row=document.createElement('div'); row.className='manager-person';
+        const row=document.createElement('div'); row.className='manager-person manager-month-summary';
         const name=document.createElement('div'); name.className='manager-name'; name.textContent=(viewMonth+1)+'월 전체';
         const counts=document.createElement('div'); counts.className='manager-counts'; counts.style.gridTemplateColumns='repeat(3,minmax(0,1fr))'; counts.style.width='100%';
         const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+visitTotal+'개';
@@ -1306,10 +1324,18 @@ function escapeHtml(s){
         const row=document.createElement('div'); row.className='manager-person';
         const name=document.createElement('div'); name.className='manager-name'; name.textContent=person.name;
         const counts=document.createElement('div'); counts.className='manager-counts';
-        const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+person.visit+'개';
-        const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+person.facility+'개';
-        const other=document.createElement('span'); other.className='other'; other.textContent='기타 '+person.other+'개';
-        counts.append(visit,facility); const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
+        if(typeFilter==='visit'){
+          const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+person.visit+'개'; counts.append(visit);
+        }else if(typeFilter==='facility'){
+          const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+person.facility+'개'; counts.append(facility);
+        }else if(typeFilter==='other'){
+          const other=document.createElement('span'); other.className='other'; other.textContent='기타 '+person.other+'개'; counts.append(other);
+        }else{
+          const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+person.visit+'개';
+          const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+person.facility+'개';
+          counts.append(visit,facility);
+        }
+        const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
         row.addEventListener('click',()=>{group.classList.toggle('expanded'); expand.setAttribute('aria-label',group.classList.contains('expanded')?'내용 접기':'내용 펼치기');});
         const details=document.createElement('div'); details.className='manager-details';
         person.entries.sort((a,b)=>a.day-b.day || ((a.hour??99)-(b.hour??99))).forEach(ent=>{
@@ -1338,10 +1364,19 @@ function escapeHtml(s){
       const counts=document.createElement('div'); counts.className='manager-counts';
       const visitCount=unnamedEntries.filter(ent=>ent.type==='visit').length;
       const facilityCount=unnamedEntries.filter(ent=>ent.type==='facility').length;
-      const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+visitCount+'개';
-      const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+facilityCount+'개';
-      const otherCount=unnamedEntries.filter(ent=>ent.type==='other').length; const other=document.createElement('span'); other.className='other'; other.textContent='기타 '+otherCount+'개';
-      counts.append(visit,facility); const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
+      const otherCount=unnamedEntries.filter(ent=>ent.type==='other').length;
+      if(typeFilter==='visit'){
+        const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+visitCount+'개'; counts.append(visit);
+      }else if(typeFilter==='facility'){
+        const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+facilityCount+'개'; counts.append(facility);
+      }else if(typeFilter==='other'){
+        const other=document.createElement('span'); other.className='other'; other.textContent='기타 '+otherCount+'개'; counts.append(other);
+      }else{
+        const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+visitCount+'개';
+        const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+facilityCount+'개';
+        counts.append(visit,facility);
+      }
+      const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
       row.addEventListener('click',()=>{group.classList.toggle('expanded'); expand.setAttribute('aria-label',group.classList.contains('expanded')?'내용 접기':'내용 펼치기');});
       const details=document.createElement('div'); details.className='manager-details';
       unnamedEntries.forEach(ent=>{
@@ -1359,7 +1394,7 @@ function escapeHtml(s){
       group.appendChild(details); list.appendChild(group);
     }
     const unnamedCount = unnamedEntries.length;
-    if(unassigned) unassigned.textContent = '팝업 표시 '+data.calendarEntries.length+'개 · 이름(메모) 미입력 일정 '+unnamedCount+'개도 아래에 표시했습니다. 삭제한 내역은 달력에 그대로 남아 있습니다.';
+    if(unassigned) unassigned.textContent = (typeFilter==='visit'?'방문 일정만 표시합니다.':(typeFilter==='facility'?'요양 일정만 표시합니다.':(typeFilter==='other'?'기타 일정만 표시합니다.':'방문·요양 일정과 월 전체 일정을 표시합니다.')))+' 팝업 표시 '+data.calendarEntries.length+'개 · 이름(메모) 미입력 일정 '+unnamedCount+'개도 아래에 표시했습니다. 삭제한 내역은 달력에 그대로 남아 있습니다.';
   }
 
   const managerModal = document.getElementById('managerModal');
