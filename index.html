@@ -77,8 +77,8 @@
    .month-stat:active{transform:translateY(1px);}
    .panel-right-meta .panel-holiday{margin-right:4px;}
    @media(max-width:430px){
-    .manager-person{grid-template-columns:minmax(0,1fr) 136px 20px;gap:5px;padding:8px;}
-    .manager-counts{width:136px;gap:3px;font-size:11px;}
+    .manager-person{grid-template-columns:minmax(0,1fr) 174px 20px;gap:5px;padding:8px;}
+    .manager-counts{width:174px;gap:3px;font-size:10px;}
     .manager-counts span{padding:5px 2px;}
     .manager-name{font-size:13px;}
     .panel-header{gap:4px;}
@@ -217,6 +217,7 @@
   .type-pill.selected{border-color:var(--text);}
   .type-pill.facility{background:var(--facility);}
   .type-pill.visit{background:var(--visit);}
+  .type-pill.other{background:#4fb3a9;}
 
   .seg-toggle{display:flex;background:var(--surface2);border-radius:10px;padding:3px;}
   .seg-toggle button{flex:1;padding:9px;border:none;background:none;color:var(--text-dim);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
@@ -319,7 +320,7 @@
   .manager-count-btn{height:42px;min-width:82px;padding:0 9px;border:1px solid rgba(139,92,246,.48);border-radius:10px;background:rgba(139,92,246,.12);color:#7650bd;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:900;line-height:1;box-shadow:0 2px 7px rgba(0,0,0,.09);white-space:nowrap;}
   .manager-count-btn b{font-size:17px;line-height:1;}
   .manager-person-group{margin:7px 0 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);overflow:hidden;}
-  .manager-person{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid var(--line);}
+  .manager-person{display:grid;grid-template-columns:minmax(0,1fr) 198px 22px;align-items:center;gap:7px;padding:10px;border-bottom:1px solid var(--line);}
   .manager-person-group:last-child .manager-person{border-bottom:0;}
   .manager-details{padding:2px 7px 5px;display:none;} .manager-person-group.expanded .manager-details{display:block;} .manager-expand{flex-shrink:0;width:22px;height:22px;border:0;background:transparent;color:var(--text-dim);font-size:17px;font-weight:900;padding:0;line-height:1;} .manager-person-group.expanded .manager-expand{transform:rotate(180deg);}
   .manager-detail{display:flex;align-items:center;gap:6px;padding:6px 2px;border-top:1px dashed var(--line);font-size:12px;}
@@ -341,10 +342,11 @@
   .manager-list{overflow-y:auto;min-height:0;}
   .manager-person{display:grid;grid-template-columns:minmax(0,1fr) 148px 22px;align-items:center;gap:7px;padding:8px 9px;margin:4px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface2);cursor:pointer;}
   .manager-name{font-size:14px;font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .manager-counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;width:148px;min-width:0;font-size:12px;font-weight:900;}
+  .manager-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:198px;min-width:0;font-size:12px;font-weight:900;}
   .manager-counts span{display:block;text-align:center;padding:5px 3px;border-radius:7px;white-space:nowrap;}
   .manager-counts .visit{color:#1769aa;background:rgba(74,167,245,.16);}
   .manager-counts .facility{color:#a86d05;background:rgba(241,184,75,.18);}
+  .manager-counts .other{color:#168a7d;background:rgba(79,179,169,.18);}
   .manager-empty{padding:22px 8px;text-align:center;color:var(--text-dim);font-size:13px;}
   .manager-unassigned{font-size:11px;color:var(--text-dim);padding-top:9px;border-top:1px solid var(--line);margin-top:8px;}
   .panel-holiday{font-size:11px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -610,6 +612,7 @@
       <div class="type-toggle" id="typeToggle">
         <div class="type-pill visit" data-type="visit">방문간호</div>
         <div class="type-pill facility" data-type="facility">요양간호</div>
+        <div class="type-pill other" data-type="other">기타일정</div>
       </div>
       <div class="hint">구분은 선택사항입니다. 선택하지 않고 메모만 등록할 수 있습니다.</div>
     </div>
@@ -809,7 +812,7 @@
   }
 
   function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
-  const TYPE_COLOR = { facility: getCss('--facility'), visit: getCss('--visit') };
+  const TYPE_COLOR = { facility: getCss('--facility'), visit: getCss('--visit'), other: '#4fb3a9' };
 
   function loadJSON(key, fallback){
     try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
@@ -983,7 +986,7 @@
   function dkey(y,m,d){ return y+'-'+pad(m+1)+'-'+pad(d); }
   function toDate(key){ const [y,m,d]=key.split('-').map(Number); return new Date(y,m-1,d); }
 
-  function typeLabel(type){ return type==='facility' ? '요양간호' : (type==='visit' ? '방문간호' : '메모'); }
+  function typeLabel(type){ return type==='facility' ? '요양간호' : (type==='visit' ? '방문간호' : (type==='other' ? '기타일정' : '메모')); }
   function entryTitle(ent){ return typeLabel(ent.type); }
   function getEndMinutes(ent){ return (ent.endHour===null || ent.endHour===undefined || ent.endHour==='') ? null : normalizeMinutes(ent.endHour); }
   function normalizeMinutes(h){
@@ -1243,14 +1246,14 @@ function escapeHtml(s){
     const data = {
       ...rawData,
       people: rawData.people.map(person=>{
-        const entries = (typeFilter==='visit' || typeFilter==='facility') ? person.entries.filter(ent=>ent.type===typeFilter) : person.entries;
+        const entries = (typeFilter==='visit' || typeFilter==='facility' || typeFilter==='other') ? person.entries.filter(ent=>ent.type===typeFilter) : person.entries;
         return {...person, entries,
           visit: entries.filter(ent=>ent.type==='visit').length,
           facility: entries.filter(ent=>ent.type==='facility').length,
           other: entries.filter(ent=>ent.type!=='visit' && ent.type!=='facility').length,
           total: entries.length};
       }).filter(person=>person.entries.length>0),
-      calendarEntries: (typeFilter==='visit' || typeFilter==='facility') ? rawData.calendarEntries.filter(ent=>ent.type===typeFilter) : rawData.calendarEntries
+      calendarEntries: (typeFilter==='visit' || typeFilter==='facility' || typeFilter==='other') ? rawData.calendarEntries.filter(ent=>ent.type===typeFilter) : rawData.calendarEntries
     };
     const count = document.getElementById('managerCountValue');
     if(count) count.textContent = calendarData.people.length;
@@ -1259,8 +1262,8 @@ function escapeHtml(s){
     const unassigned = document.getElementById('managerUnassigned');
     if(!list) return;
     const modalTitle = document.getElementById('managerModalTitle');
-    if(modalTitle) modalTitle.textContent = typeFilter==='visit' ? '이번 달 방문 일정' : (typeFilter==='facility' ? '이번 달 요양 일정' : (typeFilter==='summary' ? '이번 달 요약' : '이번 달 관리 현황'));
-    if(subtitle) subtitle.textContent = (viewMonth+1)+'월 '+(typeFilter==='visit'?'방문':(typeFilter==='facility'?'요양':(typeFilter==='summary'?'전체 요약':'전체')))+' 일정 · '+data.people.length+'명';
+    if(modalTitle) modalTitle.textContent = typeFilter==='visit' ? '이번 달 방문 일정' : (typeFilter==='facility' ? '이번 달 요양 일정' : (typeFilter==='other' ? '이번 달 기타 일정' : (typeFilter==='summary' ? '이번 달 요약' : '이번 달 관리 현황')));
+    if(subtitle) subtitle.textContent = (viewMonth+1)+'월 '+(typeFilter==='visit'?'방문':(typeFilter==='facility'?'요양':(typeFilter==='other'?'기타':(typeFilter==='summary'?'전체 요약':'전체'))))+' 일정 · '+data.people.length+'명';
     list.innerHTML='';
     if(data.people.length===0){
       list.innerHTML='<div class="manager-empty">이름이 메모에 입력된 일정이 없습니다.</div>';
@@ -1272,7 +1275,8 @@ function escapeHtml(s){
         const counts=document.createElement('div'); counts.className='manager-counts';
         const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+person.visit+'개';
         const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+person.facility+'개';
-        counts.append(visit,facility); const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
+        const other=document.createElement('span'); other.className='other'; other.textContent='기타 '+person.other+'개';
+        counts.append(visit,facility,other); const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
         row.addEventListener('click',()=>{group.classList.toggle('expanded'); expand.setAttribute('aria-label',group.classList.contains('expanded')?'내용 접기':'내용 펼치기');});
         const details=document.createElement('div'); details.className='manager-details';
         person.entries.sort((a,b)=>a.day-b.day || ((a.hour??99)-(b.hour??99))).forEach(ent=>{
@@ -1280,7 +1284,7 @@ function escapeHtml(s){
           const info=document.createElement('div'); info.className='manager-detail-info';
           const date=document.createElement('span'); date.className='manager-detail-date'; date.textContent=viewMonth+1+'월 '+ent.day+'일';
           const type=document.createElement('span'); type.className='manager-detail-type '+(ent.type==='visit'?'visit':(ent.type==='facility'?'facility':''));
-          type.textContent=ent.type==='visit'?'방문':(ent.type==='facility'?'요양':'기타');
+          type.textContent=ent.type==='visit'?'방문':(ent.type==='facility'?'요양':(ent.type==='other'?'기타':'메모'));
           info.append(date,type);
           if(ent.hour!==null && ent.hour!==undefined){ const time=document.createElement('span'); time.className='manager-detail-date'; time.textContent=' · '+formatHour(ent.hour)+(ent.endHour!==null && ent.endHour!==undefined?'~'+formatHour(ent.endHour):''); info.append(time); }
           const del=document.createElement('button'); del.type='button'; del.className='manager-delete'; del.textContent='삭제';
@@ -1303,7 +1307,8 @@ function escapeHtml(s){
       const facilityCount=unnamedEntries.filter(ent=>ent.type==='facility').length;
       const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+visitCount+'개';
       const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+facilityCount+'개';
-      counts.append(visit,facility); const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
+      const otherCount=unnamedEntries.filter(ent=>ent.type==='other').length; const other=document.createElement('span'); other.className='other'; other.textContent='기타 '+otherCount+'개';
+      counts.append(visit,facility,other); const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
       row.addEventListener('click',()=>{group.classList.toggle('expanded'); expand.setAttribute('aria-label',group.classList.contains('expanded')?'내용 접기':'내용 펼치기');});
       const details=document.createElement('div'); details.className='manager-details';
       unnamedEntries.forEach(ent=>{
@@ -1343,12 +1348,13 @@ function escapeHtml(s){
   managerModal.addEventListener('click',e=>{if(e.target===managerModal) closeManagerModal();});
 
   function renderMonthStats(){
-    let visit = 0, facility = 0;
+    let visit = 0, facility = 0, other = 0;
     getCalendarMonthEntries().forEach(ent=>{
       if(ent.type==='visit') visit++;
       else if(ent.type==='facility') facility++;
+      else if(ent.type==='other') other++;
     });
-    const total = visit + facility;
+    const total = visit + facility + other;
     renderManagerSummary();
     if(monthVisitCount) monthVisitCount.innerHTML = '<span>방문</span><b>' + visit + '</b>'; 
     if(monthFacilityCount) monthFacilityCount.innerHTML = '<span>요양</span><b>' + facility + '</b>'; 
