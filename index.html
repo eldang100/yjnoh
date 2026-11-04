@@ -84,8 +84,6 @@
     .panel-header{gap:4px;}
     .panel-date{font-size:15px;letter-spacing:-.55px;}
     .panel-today-badge{font-size:8px;padding:3px 5px;}
-    .manager-count-btn{height:38px;min-width:70px;padding:0 5px;font-size:10px;gap:3px;}
-    .manager-count-btn b{font-size:14px;}
     .panel-right-meta{gap:3px;flex-shrink:0;}
     .month-stats{height:40px;gap:3px;margin-left:1px;}
     .month-stat{width:51px;min-width:51px;height:37px;padding:2px 3px;border-radius:9px;}
@@ -94,7 +92,6 @@
   }
   @media(max-width:360px){
     .panel-date{font-size:14px;}
-    .manager-count-btn{min-width:64px;width:64px;}
     .month-stat{width:46px;min-width:46px;}
     .month-stat span{font-size:10px;}
     .month-stat b{font-size:14px;}
@@ -317,8 +314,6 @@
   .panel-meta{display:flex;align-items:center;gap:5px;margin-top:1px;font-size:10.5px;}
   .panel-dot{opacity:.5;}
   .panel-right-meta{display:flex;align-items:center;gap:6px;align-self:center;}
-  .manager-count-btn{height:42px;min-width:82px;padding:0 9px;border:1px solid rgba(139,92,246,.48);border-radius:10px;background:rgba(139,92,246,.12);color:#7650bd;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:900;line-height:1;box-shadow:0 2px 7px rgba(0,0,0,.09);white-space:nowrap;}
-  .manager-count-btn b{font-size:17px;line-height:1;}
   .manager-person-group{margin:7px 0 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);overflow:hidden;}
   .manager-person{display:grid;grid-template-columns:minmax(0,1fr) 164px 34px;align-items:center;gap:9px;padding:10px;border-bottom:1px solid var(--line);}
   .manager-person-group:last-child .manager-person{border-bottom:0;}
@@ -620,7 +615,7 @@
       <div class="panel-date-line"><span class="panel-date" id="panelDate"></span><span class="panel-today-badge" id="panelTodayBadge" style="display:none;">TODAY</span></div>
       <div class="panel-meta"><span id="panelCount">일정 0개</span><span class="panel-dot">·</span><span id="panelSummary">방문 0 · 요양 0</span></div>
     </div>
-    <div class="panel-right-meta"><div class="panel-holiday" id="panelHoliday"></div><button type="button" class="manager-count-btn" id="managerCountBtn"><span>관리</span><b id="managerCountValue">0</b><span>명</span></button><div class="month-stats" id="monthStats" aria-label="이번 달 일정 통계"><div class="month-stat visit" id="monthVisitCount"><span>방문</span><b>0</b></div><div class="month-stat facility" id="monthFacilityCount"><span>요양</span><b>0</b></div><div class="month-stat total" id="monthTotalCount"><span>월</span><b>0</b></div></div></div>
+    <div class="panel-right-meta"><div class="panel-holiday" id="panelHoliday"></div><div class="month-stats" id="monthStats" aria-label="이번 달 일정 통계"><div class="month-stat visit" id="monthVisitCount"><span>방문</span><b>0</b></div><div class="month-stat facility" id="monthFacilityCount"><span>요양</span><b>0</b></div><div class="month-stat total" id="monthTotalCount"><span>월</span><b>0</b></div></div></div>
   </div>
   <div class="panel-divider"></div>
   <div id="panelList"></div>
@@ -1291,8 +1286,6 @@ function escapeHtml(s){
       }).filter(person=>person.entries.length>0),
       calendarEntries: (typeFilter==='visit' || typeFilter==='facility' || typeFilter==='other') ? rawData.calendarEntries.filter(ent=>ent.type===typeFilter) : rawData.calendarEntries
     };
-    const count = document.getElementById('managerCountValue');
-    if(count) count.textContent = calendarData.people.length;
     const list = document.getElementById('managerModalList');
     const subtitle = document.getElementById('managerModalSubtitle');
     const unassigned = document.getElementById('managerUnassigned');
@@ -1420,7 +1413,6 @@ function escapeHtml(s){
     managerModal.classList.add('open');
     pushAppHistory();
   }
-  document.getElementById('managerCountBtn').addEventListener('click',()=>openManagerModal());
   if(monthVisitCount) monthVisitCount.addEventListener('click',()=>openManagerModal('visit'));
   if(monthFacilityCount) monthFacilityCount.addEventListener('click',()=>openManagerModal('facility'));
   if(monthTotalCount) monthTotalCount.addEventListener('click',()=>openManagerModal('summary'));
