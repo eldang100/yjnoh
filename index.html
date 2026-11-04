@@ -73,6 +73,7 @@
    .month-stat b{font-size:17px;font-weight:950;line-height:19px;white-space:nowrap;}
    .month-stat.visit{color:#1769aa;background:rgba(74,167,245,.16);border-color:rgba(74,167,245,.50);}
    .month-stat.facility{color:#a86d05;background:rgba(241,184,75,.18);border-color:rgba(241,184,75,.55);}
+   .month-stat.other{color:#6b58b8;background:rgba(150,125,235,.16);border-color:rgba(150,125,235,.50);}
    .month-stat.total{color:#087d69;background:rgba(69,208,177,.16);border-color:rgba(69,208,177,.50);}
    .month-stat:active{transform:translateY(1px);}
    .panel-right-meta .panel-holiday{margin-right:4px;}
@@ -615,7 +616,7 @@
       <div class="panel-date-line"><span class="panel-date" id="panelDate"></span><span class="panel-today-badge" id="panelTodayBadge" style="display:none;">TODAY</span></div>
       <div class="panel-meta"><span id="panelCount">일정 0개</span><span class="panel-dot">·</span><span id="panelSummary">방문 0 · 요양 0</span></div>
     </div>
-    <div class="panel-right-meta"><div class="panel-holiday" id="panelHoliday"></div><div class="month-stats" id="monthStats" aria-label="이번 달 일정 통계"><div class="month-stat visit" id="monthVisitCount"><span>방문</span><b>0</b></div><div class="month-stat facility" id="monthFacilityCount"><span>요양</span><b>0</b></div><div class="month-stat total" id="monthTotalCount"><span>월</span><b>0</b></div></div></div>
+    <div class="panel-right-meta"><div class="panel-holiday" id="panelHoliday"></div><div class="month-stats" id="monthStats" aria-label="이번 달 일정 통계"><div class="month-stat visit" id="monthVisitCount"><span>방문</span><b>0</b></div><div class="month-stat facility" id="monthFacilityCount"><span>요양</span><b>0</b></div><div class="month-stat other" id="monthOtherCount"><span>기타</span><b>0</b></div><div class="month-stat total" id="monthTotalCount"><span>월</span><b>0</b></div></div></div>
   </div>
   <div class="panel-divider"></div>
   <div id="panelList"></div>
@@ -1210,6 +1211,7 @@ function escapeHtml(s){
   const panelTodayBadge = document.getElementById('panelTodayBadge');
   const monthVisitCount = document.getElementById('monthVisitCount');
   const monthFacilityCount = document.getElementById('monthFacilityCount');
+  const monthOtherCount = document.getElementById('monthOtherCount');
   const monthTotalCount = document.getElementById('monthTotalCount');
   const bottomPanel = document.getElementById('bottomPanel');
   const panelCollapseHandle = document.getElementById('panelCollapseHandle');
@@ -1415,6 +1417,7 @@ function escapeHtml(s){
   }
   if(monthVisitCount) monthVisitCount.addEventListener('click',()=>openManagerModal('visit'));
   if(monthFacilityCount) monthFacilityCount.addEventListener('click',()=>openManagerModal('facility'));
+  if(monthOtherCount) monthOtherCount.addEventListener('click',()=>openManagerModal('other'));
   if(monthTotalCount) monthTotalCount.addEventListener('click',()=>openManagerModal('summary'));
   function closeManagerModal(){
     if(!managerModal.classList.contains('open')) return;
@@ -1435,6 +1438,7 @@ function escapeHtml(s){
     renderManagerSummary();
     if(monthVisitCount) monthVisitCount.innerHTML = '<span>방문</span><b>' + visit + '</b>'; 
     if(monthFacilityCount) monthFacilityCount.innerHTML = '<span>요양</span><b>' + facility + '</b>'; 
+    if(monthOtherCount) monthOtherCount.innerHTML = '<span>기타</span><b>' + other + '</b>';
     if(monthTotalCount) monthTotalCount.innerHTML = '<span>월</span><b>' + total + '</b>'; 
   }
 
