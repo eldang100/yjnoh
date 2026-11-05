@@ -1245,14 +1245,15 @@ function escapeHtml(s){
     const calendarEntries = includeHidden ? allCalendarEntries : allCalendarEntries.filter(ent=>!hidden.has(managerEntryKey(ent)));
     calendarEntries.forEach(ent=>{
       const displayName = String(ent.memo || '').trim().replace(/\s+/g,' ');
+      // 이름(메모)이 없어도 일정은 월별 집계/종류별 팝업의 일정 수에서 제외하지 않습니다.
       if(!displayName){ unnamed++; return; }
+      if(ent.type!=='visit' && ent.type!=='facility' && ent.type!=='other') return;
       const personKey = displayName.toLocaleLowerCase('ko-KR');
-      if(ent.type!=='visit' && ent.type!=='facility') return;
       if(!people.has(personKey)) people.set(personKey,{name:displayName,visit:0,facility:0,other:0,total:0,entries:[]});
       const item = people.get(personKey);
       if(ent.type==='visit') item.visit++;
       else if(ent.type==='facility') item.facility++;
-      else item.other++;
+      else if(ent.type==='other') item.other++;
       item.total++;
       item.entries.push(ent);
     });
@@ -1345,7 +1346,8 @@ function escapeHtml(s){
         }else{
           const visit=document.createElement('span'); visit.className='visit'; visit.textContent='방문 '+person.visit+'개';
           const facility=document.createElement('span'); facility.className='facility'; facility.textContent='요양 '+person.facility+'개';
-          counts.append(visit,facility);
+          const other=document.createElement('span'); other.className='other'; other.textContent='기타 '+person.other+'개';
+          counts.append(visit,facility,other);
         }
         const expand=document.createElement('button'); expand.type='button'; expand.className='manager-expand'; expand.setAttribute('aria-label','내용 펼치기'); expand.textContent='⌄'; row.append(name,counts,expand); group.appendChild(row);
         row.addEventListener('click',()=>{group.classList.toggle('expanded'); expand.setAttribute('aria-label',group.classList.contains('expanded')?'내용 접기':'내용 펼치기');});
