@@ -922,6 +922,7 @@
   // 잘못된 반복일정 한 건 때문에 달력 전체가 비어 보이는 문제를 방지합니다.
   function normalizeScheduleData(){
     let changed = false;
+    const originalRecurringJSON = JSON.stringify(recurring);
 
     // 1회 일정은 반드시 { 'YYYY-MM-DD': Array } 형태로 맞춥니다.
     if(!singles || typeof singles !== 'object' || Array.isArray(singles)){
@@ -934,7 +935,7 @@
         if(!Array.isArray(singles[key])) changed = true;
         cleanSingles[key] = list.filter(e=>e && typeof e==='object').map(e=>({
           id: e.id || ('e'+Math.random().toString(36).slice(2)),
-          type: e.type==='visit' ? 'visit' : (e.type==='facility' ? 'facility' : null),
+          type: e.type==='visit' ? 'visit' : (e.type==='facility' ? 'facility' : (e.type==='other' ? 'other' : null)),
           memo: typeof e.memo==='string' ? e.memo : '',
           color: e.color || null,
           hour: e.hour ?? null,
@@ -964,7 +965,7 @@
       if(JSON.stringify(days)!==JSON.stringify(r.days||[])) changed = true;
       return {
         id: r.id || ('r'+Math.random().toString(36).slice(2)),
-        type: r.type==='visit' ? 'visit' : (r.type==='facility' ? 'facility' : null),
+        type: r.type==='visit' ? 'visit' : (r.type==='facility' ? 'facility' : (r.type==='other' ? 'other' : null)),
         memo: typeof r.memo==='string' ? r.memo : '',
         color: r.color || null,
         hour: r.hour ?? null,
@@ -975,6 +976,8 @@
         skip: Array.isArray(r.skip) ? r.skip.filter(x=>typeof x==='string') : []
       };
     }).filter(r=>r.days.length>0);
+
+    if(JSON.stringify(recurring)!==originalRecurringJSON) changed = true;
 
     if(changed){
       try{
