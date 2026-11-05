@@ -215,7 +215,7 @@
   .type-pill.selected{border-color:var(--text);}
   .type-pill.facility{background:var(--facility);}
   .type-pill.visit{background:var(--visit);}
-  .type-pill.other{background:#4fb3a9;}
+   .type-pill.other{background:#8b5cf6;}
 
   .seg-toggle{display:flex;background:var(--surface2);border-radius:10px;padding:3px;}
   .seg-toggle button{flex:1;padding:9px;border:none;background:none;color:var(--text-dim);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
@@ -843,7 +843,7 @@
   }
 
   function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
-  const TYPE_COLOR = { facility: getCss('--facility'), visit: getCss('--visit'), other: '#4fb3a9' };
+  const TYPE_COLOR = { facility: getCss('--facility'), visit: getCss('--visit'), other: '#8b5cf6' };
 
   function loadJSON(key, fallback){
     try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
